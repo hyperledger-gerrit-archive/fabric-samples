@@ -11,3 +11,4 @@ first-network/channel-artifacts/*.tx
 first-network/channel-artifacts/*.block
 first-network/crypto-config/*
 
+chaincode-docker-devmode/myc.block
