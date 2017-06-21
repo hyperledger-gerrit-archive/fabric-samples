@@ -64,7 +64,7 @@ function askProceed () {
     ;;
     * )
       echo "invalid response"
-      proceed
+      askProceed
     ;;
   esac
 }
