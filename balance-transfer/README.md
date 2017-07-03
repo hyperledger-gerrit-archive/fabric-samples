@@ -40,7 +40,21 @@ docker-compose -f artifacts/docker-compose.yaml up
 ```
 ##### Terminal Window 2
 
-* Execute the REST APIs from the section [Sample REST APIs Requests](https://github.com/hyperledger/fabric-sdk-node/tree/master/examples/balance-transfer#running-the-sample-program)
+* Install the fabric-client and fabric-ca-client node modules
+
+```
+npm install
+```
+
+* Start the node app on PORT 4000 
+
+```
+PORT=4000 node app
+```
+
+##### Terminal Window 3
+
+* Execute the REST APIs from the section [Sample REST APIs Requests](https://github.com/hyperledger/fabric-samples/tree/master/balance-transfer#sample-rest-apis-requests)
 
 
 ### Option 2:
