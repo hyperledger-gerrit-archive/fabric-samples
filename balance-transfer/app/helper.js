@@ -116,7 +116,7 @@ function newRemotes(urls, forPeers, userOrg) {
 				// if looking for event hubs, an app can only connect to
 				// event hubs in its own org
 				if (!forPeers && key !== userOrg) {
-					continue;
+					continue outer;
 				}
 
 				let org = ORGS[key];
