@@ -216,12 +216,12 @@ app.post('/channels/:channelName/chaincodes', function(req, res) {
 	var chaincodeName = req.body.chaincodeName;
 	var chaincodeVersion = req.body.chaincodeVersion;
 	var channelName = req.params.channelName;
-	var functionName = req.body.functionName;
+	var functionName = req.body.fcn;
 	var args = req.body.args;
 	logger.debug('channelName  : ' + channelName);
 	logger.debug('chaincodeName : ' + chaincodeName);
 	logger.debug('chaincodeVersion  : ' + chaincodeVersion);
-	logger.debug('functionName  : ' + functionName);
+	logger.debug('fcn  : ' + functionName);
 	logger.debug('args  : ' + args);
 	if (!chaincodeName) {
 		res.json(getErrorMessage('\'chaincodeName\''));
@@ -233,10 +233,6 @@ app.post('/channels/:channelName/chaincodes', function(req, res) {
 	}
 	if (!channelName) {
 		res.json(getErrorMessage('\'channelName\''));
-		return;
-	}
-	if (!functionName) {
-		res.json(getErrorMessage('\'functionName\''));
 		return;
 	}
 	if (!args) {
@@ -260,10 +256,6 @@ app.post('/channels/:channelName/chaincodes/:chaincodeName', function(req, res) 
 	logger.debug('chaincodeName : ' + chaincodeName);
 	logger.debug('fcn  : ' + fcn);
 	logger.debug('args  : ' + args);
-	if (!peers || peers.length == 0) {
-		res.json(getErrorMessage('\'peers\''));
-		return;
-	}
 	if (!chaincodeName) {
 		res.json(getErrorMessage('\'chaincodeName\''));
 		return;

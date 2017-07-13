@@ -26,11 +26,11 @@ var EventHub = require('fabric-client/lib/EventHub.js');
 hfc.addConfigFile(path.join(__dirname, 'network-config.json'));
 var ORGS = hfc.getConfigSetting('network-config');
 
-var invokeChaincode = function(peersUrls, channelName, chaincodeName, fcn, args, username, org) {
+var invokeChaincode = function(peerNames, channelName, chaincodeName, fcn, args, username, org) {
 	logger.debug(util.format('\n============ invoke transaction on organization %s ============\n', org));
 	var client = helper.getClientForOrg(org);
 	var channel = helper.getChannelForOrg(org);
-	var targets = helper.newPeers(peersUrls);
+	var targets = (peerNames) ? helper.newPeers(peerNames, org) : undefined;
 	var tx_id = null;
 
 	return helper.getRegisteredUsers(username, org).then((user) => {
@@ -38,13 +38,16 @@ var invokeChaincode = function(peersUrls, channelName, chaincodeName, fcn, args,
 		logger.debug(util.format('Sending transaction "%j"', tx_id));
 		// send proposal to endorser
 		var request = {
-			targets: targets,
 			chaincodeId: chaincodeName,
 			fcn: fcn,
 			args: args,
 			chainId: channelName,
 			txId: tx_id
 		};
+
+		if (targets)
+			request.targets = targets;
+
 		return channel.sendTransactionProposal(request);
 	}, (err) => {
 		logger.error('Failed to enroll user \'' + username + '\'. ' + err);
@@ -80,7 +83,13 @@ var invokeChaincode = function(peersUrls, channelName, chaincodeName, fcn, args,
 			var transactionID = tx_id.getTransactionID();
 			var eventPromises = [];
 
-			var eventhubs = helper.newEventHubs(peersUrls, org);
+			if (!peerNames) {
+				peerNames = channel.getPeers().map(function(peer) {
+					return peer.getName();
+				});
+			}
+
+			var eventhubs = helper.newEventHubs(peerNames, org);
 			for (let key in eventhubs) {
 				let eh = eventhubs[key];
 				eh.connect();

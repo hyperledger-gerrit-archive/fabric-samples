@@ -49,10 +49,13 @@ var instantiateChaincode = function(channelName, chaincodeName, chaincodeVersion
 		var request = {
 			chaincodeId: chaincodeName,
 			chaincodeVersion: chaincodeVersion,
-			fcn: functionName,
 			args: args,
 			txId: tx_id
 		};
+
+		if (functionName)
+			request.fcn = functionName;
+
 		return channel.sendInstantiateProposal(request);
 	}, (err) => {
 		logger.error('Failed to initialize the channel');
@@ -88,12 +91,12 @@ var instantiateChaincode = function(channelName, chaincodeName, chaincodeVersion
 			var deployId = tx_id.getTransactionID();
 
 			eh = client.newEventHub();
-			let data = fs.readFileSync(path.join(__dirname, ORGS[org]['peer1'][
+			let data = fs.readFileSync(path.join(__dirname, ORGS[org].peers['peer1'][
 				'tls_cacerts'
 			]));
-			eh.setPeerAddr(ORGS[org]['peer1']['events'], {
+			eh.setPeerAddr(ORGS[org].peers['peer1']['events'], {
 				pem: Buffer.from(data).toString(),
-				'ssl-target-name-override': ORGS[org]['peer1']['server-hostname']
+				'ssl-target-name-override': ORGS[org].peers['peer1']['server-hostname']
 			});
 			eh.connect();
 
