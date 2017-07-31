@@ -63,8 +63,8 @@ var instantiateChaincode = function(channelName, chaincodeName, chaincodeVersion
 		var all_good = true;
 		for (var i in proposalResponses) {
 			let one_good = false;
-			if (proposalResponses && proposalResponses[0].response &&
-				proposalResponses[0].response.status === 200) {
+			if (proposalResponses && proposalResponses[i].response &&
+				proposalResponses[i].response.status === 200) {
 				one_good = true;
 				logger.info('instantiate proposal was good');
 			} else {
@@ -145,7 +145,7 @@ var instantiateChaincode = function(channelName, chaincodeName, chaincodeVersion
 	}).then((response) => {
 		if (response.status === 'SUCCESS') {
 			logger.info('Successfully sent transaction to the orderer.');
-			return 'Chaincode Instantiateion is SUCCESS';
+			return 'Chaincode Instantiation is SUCCESS';
 		} else {
 			logger.error('Failed to order the transaction. Error code: ' + response.status);
 			return 'Failed to order the transaction. Error code: ' + response.status;
