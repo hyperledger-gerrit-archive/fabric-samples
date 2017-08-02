@@ -34,7 +34,7 @@ export FABRIC_CFG_PATH=${PWD}
 # Print the usage message
 function printHelp () {
   echo "Usage: "
-  echo "  byfn.sh -m up|down|restart|generate [-c <channel name>] [-t <timeout>]"
+  echo "  byfn.sh -m up|down|restart|generate [-c <channel name>] [-t <timeout>] [-f <docker-compose-file>]"
   echo "  byfn.sh -h|--help (print this message)"
   echo "    -m <mode> - one of 'up', 'down', 'restart' or 'generate'"
   echo "      - 'up' - bring up the network with docker-compose up"
@@ -43,6 +43,7 @@ function printHelp () {
   echo "      - 'generate' - generate required certificates and genesis block"
   echo "    -c <channel name> - channel name to use (defaults to \"mychannel\")"
   echo "    -t <timeout> - CLI timeout duration in microseconds (defaults to 10000)"
+  echo "    -f <docker-compose-file> - receives the docker-compose file to use as architecture (defaults to docker-compose-cli.yaml)"
   echo
   echo "Typically, one would first generate the required certificates and "
   echo "genesis block, then bring up the network. e.g.:"
@@ -301,7 +302,7 @@ CHANNEL_NAME="mychannel"
 COMPOSE_FILE=docker-compose-cli.yaml
 
 # Parse commandline args
-while getopts "h?m:c:t:" opt; do
+while getopts "h?m:c:t:f:" opt; do
   case "$opt" in
     h|\?)
       printHelp
@@ -312,6 +313,8 @@ while getopts "h?m:c:t:" opt; do
     c)  CHANNEL_NAME=$OPTARG
     ;;
     t)  CLI_TIMEOUT=$OPTARG
+    ;;
+    f)  COMPOSE_FILE=$OPTARG
     ;;
   esac
 done
