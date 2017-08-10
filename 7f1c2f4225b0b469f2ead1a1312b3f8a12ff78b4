@@ -1,0 +1,8 @@
+Verified+1: Hyperledger Jobbuilder <jobbuilder@jenkins.hyperledger.org>
+Code-Review+2: Jason Yellick <jyellick@us.ibm.com>
+Code-Review+2: Binh Nguyen <binhn@us.ibm.com>
+Submitted-by: Binh Nguyen <binhn@us.ibm.com>
+Submitted-at: Thu, 10 Aug 2017 15:09:19 +0000
+Reviewed-on: https://gerrit.hyperledger.org/r/11249
+Project: fabric-samples
+Branch: refs/heads/master
