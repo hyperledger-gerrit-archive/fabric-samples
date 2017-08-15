@@ -110,11 +110,10 @@ function networkUp () {
     replacePrivateKey
     generateChannelArtifacts
   fi
-  CHANNEL_NAME=$CHANNEL_NAME TIMEOUT=$CLI_TIMEOUT DELAY=$CLI_DELAY docker-compose -f $COMPOSE_FILE up -d 2>&1
   if [ "${IF_COUCHDB}" == "couchdb" ]; then
-      CHANNEL_NAME=$CHANNEL_NAME TIMEOUT=$CLI_TIMEOUT docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_COUCH up -d 2>&1
+      CHANNEL_NAME=$CHANNEL_NAME TIMEOUT=$CLI_TIMEOUT DELAY=$CLI_DELAY docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_COUCH up -d 2>&1
   else
-      CHANNEL_NAME=$CHANNEL_NAME TIMEOUT=$CLI_TIMEOUT docker-compose -f $COMPOSE_FILE up -d 2>&1
+      CHANNEL_NAME=$CHANNEL_NAME TIMEOUT=$CLI_TIMEOUT DELAY=$CLI_DELAY docker-compose -f $COMPOSE_FILE up -d 2>&1
   fi
   if [ $? -ne 0 ]; then
     echo "ERROR !!!! Unable to start network"
@@ -353,10 +352,9 @@ fi
 # Announce what was requested
 
   if [ "${IF_COUCHDB}" == "couchdb" ]; then
-        echo
-        echo "${EXPMODE} with channel '${CHANNEL_NAME}' and CLI timeout of '${CLI_TIMEOUT}' using database '${IF_COUCHDB}'"
+        echo "${EXPMODE} with channel '${CHANNEL_NAME}' and CLI timeout of '${CLI_TIMEOUT}' and CLI delay of '${CLI_DELAY}' and using database '${IF_COUCHDB}'"
   else
-        echo "${EXPMODE} with channel '${CHANNEL_NAME}' and CLI timeout of '${CLI_TIMEOUT}'"
+        echo "${EXPMODE} with channel '${CHANNEL_NAME}' and CLI timeout of '${CLI_TIMEOUT}' and CLI delay of '${CLI_DELAY}'"
   fi
 # ask for confirmation to proceed
 askProceed
