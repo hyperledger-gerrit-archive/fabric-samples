@@ -36,7 +36,11 @@ var queryChaincode = function(peer, channelName, chaincodeName, args, fcn, usern
 			fcn: fcn,
 			args: args
 		};
-		return channel.queryByChaincode(request, target);
+
+		if (target)
+			request.targets = target;
+
+		return channel.queryByChaincode(request);
 	}, (err) => {
 		logger.info('Failed to get submitter \''+username+'\'');
 		return 'Failed to get submitter \''+username+'\'. Error: ' + err.stack ? err.stack :
@@ -46,9 +50,9 @@ var queryChaincode = function(peer, channelName, chaincodeName, args, fcn, usern
 			for (let i = 0; i < response_payloads.length; i++) {
 				logger.info(args[0]+' now has ' + response_payloads[i].toString('utf8') +
 					' after the move');
-				return args[0]+' now has ' + response_payloads[i].toString('utf8') +
-					' after the move';
 			}
+			return args[0]+' now has ' + response_payloads[0].toString('utf8') +
+				' after the move';
 		} else {
 			logger.error('response_payloads is null');
 			return 'response_payloads is null';
