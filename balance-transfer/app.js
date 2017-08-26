@@ -216,11 +216,13 @@ app.post('/chaincodes', function(req, res) {
 // Instantiate chaincode on target peers
 app.post('/channels/:channelName/chaincodes', function(req, res) {
 	logger.debug('==================== INSTANTIATE CHAINCODE ==================');
+	var peers = req.body.peers;
 	var chaincodeName = req.body.chaincodeName;
 	var chaincodeVersion = req.body.chaincodeVersion;
 	var channelName = req.params.channelName;
 	var fcn = req.body.fcn;
 	var args = req.body.args;
+	logger.debug('peers : ' + peers); // target peers list
 	logger.debug('channelName  : ' + channelName);
 	logger.debug('chaincodeName : ' + chaincodeName);
 	logger.debug('chaincodeVersion  : ' + chaincodeVersion);
@@ -242,7 +244,7 @@ app.post('/channels/:channelName/chaincodes', function(req, res) {
 		res.json(getErrorMessage('\'args\''));
 		return;
 	}
-	instantiate.instantiateChaincode(channelName, chaincodeName, chaincodeVersion, fcn, args, req.username, req.orgname)
+	instantiate.instantiateChaincode(peers, channelName, chaincodeName, chaincodeVersion, fcn, args, req.username, req.orgname)
 	.then(function(message) {
 		res.send(message);
 	});
@@ -255,6 +257,7 @@ app.post('/channels/:channelName/chaincodes/:chaincodeName', function(req, res) 
 	var channelName = req.params.channelName;
 	var fcn = req.body.fcn;
 	var args = req.body.args;
+	logger.debug('peers : ' + peers); // target peers list
 	logger.debug('channelName  : ' + channelName);
 	logger.debug('chaincodeName : ' + chaincodeName);
 	logger.debug('fcn  : ' + fcn);

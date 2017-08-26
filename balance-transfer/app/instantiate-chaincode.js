@@ -26,12 +26,13 @@ var ORGS = hfc.getConfigSetting('network-config');
 var tx_id = null;
 var eh = null;
 
-var instantiateChaincode = function(channelName, chaincodeName, chaincodeVersion, functionName, args, username, org) {
+var instantiateChaincode = function(peerNames, channelName, chaincodeName, chaincodeVersion, functionName, args, username, org) {
 	logger.debug('\n============ Instantiate chaincode on organization ' + org +
 		' ============\n');
 
 	var channel = helper.getChannelForOrg(org);
 	var client = helper.getClientForOrg(org);
+	var targets = (peerNames) ? helper.newPeers(peerNames, org) : undefined;
 
 	return helper.getOrgAdmin(org).then((user) => {
 		// read the config block from the orderer for the channel
@@ -51,6 +52,8 @@ var instantiateChaincode = function(channelName, chaincodeName, chaincodeVersion
 			txId: tx_id
 		};
 
+		if (targets)
+			request.targets = targets;
 		if (functionName)
 			request.fcn = functionName;
 
@@ -87,43 +90,47 @@ var instantiateChaincode = function(channelName, chaincodeName, chaincodeVersion
 			// if the transaction did not get committed within the timeout period,
 			// fail the test
 			var deployId = tx_id.getTransactionID();
+			var eventPromises = [];
 
-			eh = client.newEventHub();
-			let data = fs.readFileSync(path.join(__dirname, ORGS[org].peers['peer1'][
-				'tls_cacerts'
-			]));
-			eh.setPeerAddr(ORGS[org].peers['peer1']['events'], {
-				pem: Buffer.from(data).toString(),
-				'ssl-target-name-override': ORGS[org].peers['peer1']['server-hostname']
-			});
-			eh.connect();
-
-			let txPromise = new Promise((resolve, reject) => {
-				let handle = setTimeout(() => {
-					eh.disconnect();
-					reject();
-				}, 30000);
-
-				eh.registerTxEvent(deployId, (tx, code) => {
-					logger.info(
-						'The chaincode instantiate transaction has been committed on peer ' +
-						eh._ep._endpoint.addr);
-					clearTimeout(handle);
-					eh.unregisterTxEvent(deployId);
-					eh.disconnect();
-
-					if (code !== 'VALID') {
-						logger.error('The chaincode instantiate transaction was invalid, code = ' + code);
-						reject();
-					} else {
-						logger.info('The chaincode instantiate transaction was valid.');
-						resolve();
-					}
+			if (!peerNames) {
+				peerNames = channel.getPeers().map(function(peer) {
+					return peer.getName();
 				});
-			});
+			}
+
+			var eventhubs = helper.newEventHubs(peerNames, org);
+			for (let key in eventhubs) {
+				let eh = eventhubs[key];
+				eh.connect();
+
+				let txPromise = new Promise((resolve, reject) => {
+					let handle = setTimeout(() => {
+						eh.disconnect();
+						reject();
+					}, 30000);
+
+					eh.registerTxEvent(deployId, (tx, code) => {
+						clearTimeout(handle);
+						eh.unregisterTxEvent(deployId);
+						eh.disconnect();
+
+						if (code !== 'VALID') {
+							logger.error(
+								'The balance transfer transaction was invalid, code = ' + code);
+							reject();
+						} else {
+							logger.info(
+								'The balance transfer transaction has been committed on peer ' +
+								eh._ep._endpoint.addr);
+							resolve();
+						}
+					});
+				});
+				eventPromises.push(txPromise);
+			};
 
 			var sendPromise = channel.sendTransaction(request);
-			return Promise.all([sendPromise].concat([txPromise])).then((results) => {
+			return Promise.all([sendPromise].concat(eventPromises)).then((results) => {
 				logger.debug('Event promise all complete and testing complete');
 				return results[0]; // the first returned value is from the 'sendPromise' which is from the 'sendTransaction()' call
 			}).catch((err) => {
