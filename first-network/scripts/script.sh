@@ -87,7 +87,7 @@ updateAnchorPeers() {
 	echo
 }
 
-## Sometimes Join takes time hence RETRY atleast for 5 times
+## Sometimes Join takes time hence RETRY at least for 5 times
 joinWithRetry () {
 	peer channel join -b $CHANNEL_NAME.block  >&log.txt
 	res=$?

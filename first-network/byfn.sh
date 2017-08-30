@@ -29,7 +29,7 @@
 
 # prepending $PWD/../bin to PATH to ensure we are picking up the correct binaries
 # this may be commented out to resolve installed version of tools if desired
-export PATH=${PWD}/../bin:${PWD}:$PATH
+export PATH=${PWD}/../bin:${·PWD}:$PATH
 export FABRIC_CFG_PATH=${PWD}
 
 # Print the usage message
@@ -353,9 +353,9 @@ fi
 
   if [ "${IF_COUCHDB}" == "couchdb" ]; then
         echo
-        echo "${EXPMODE} with channel '${CHANNEL_NAME}' and CLI timeout of '${CLI_TIMEOUT}' using database '${IF_COUCHDB}'"
+        echo "${EXPMODE} with channel '${CHANNEL_NAME}' and CLI timeout of '${CLI_TIMEOUT}' and CLI delay of '${CLI_DELAY}' and using database '${IF_COUCHDB}'"
   else
-        echo "${EXPMODE} with channel '${CHANNEL_NAME}' and CLI timeout of '${CLI_TIMEOUT}'"
+        echo "${EXPMODE} with channel '${CHANNEL_NAME}' and CLI timeout of '${CLI_TIMEOUT}' and CLI delay of '${CLI_DELAY}'"
   fi
 # ask for confirmation to proceed
 askProceed
