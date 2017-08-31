@@ -353,9 +353,9 @@ fi
 
   if [ "${IF_COUCHDB}" == "couchdb" ]; then
         echo
-        echo "${EXPMODE} with channel '${CHANNEL_NAME}' and CLI timeout of '${CLI_TIMEOUT}' using database '${IF_COUCHDB}'"
+        echo "${EXPMODE} with channel '${CHANNEL_NAME}' and CLI timeout of '${CLI_TIMEOUT}' and CLI delay of '${CLI_DELAY}' and using database '${IF_COUCHDB}'"
   else
-        echo "${EXPMODE} with channel '${CHANNEL_NAME}' and CLI timeout of '${CLI_TIMEOUT}'"
+        echo "${EXPMODE} with channel '${CHANNEL_NAME}' and CLI timeout of '${CLI_TIMEOUT}' and CLI delay of '${CLI_DELAY}'"
   fi
 # ask for confirmation to proceed
 askProceed
