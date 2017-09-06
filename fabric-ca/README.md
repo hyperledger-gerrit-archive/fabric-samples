@@ -1,0 +1,74 @@
+# Hyperledger Fabric CA sample
+
+The Hyperledger Fabric CA sample demonstrates the following:
+
+* How to use the Hyperledger Fabric CA client and server to generate all crypto
+  material rather than using cryptogen.  The cryptogen tool is not intended for
+  a production environment because it generates all private keys in one location
+  which must then be copied to the appropriate host or container. This sample demonstrates
+  how to generate crypto material for orderers, peers, administrators, and end
+  users so that private keys never leave the host or container in which they are generated.
+
+* How to use Attribute-Based Access Control (ABAC). See fabric-samples/chaincode/abac/abac.go and
+  note the use of the *github.com/hyperledger/fabric/core/chaincode/lib/cid* package to extract
+  attributes from the invoker's identity.  Only identities with the *abac.init* attribute value of
+  *true* can successfully call the *Init* function to instantiate the chaincode.
+
+## Running this sample
+
+1. If you want to run this sample with the latest published images, you may skip this step.
+Otherwise, if you want to use the latest code from the *github.com/hyperledger/fabric* and
+the *github.com/hyperledger/fabric-ca* repositories, first make sure these repositories are on
+your GOPATH and are up-to-date.  Then you may run the *build-images.sh* script to build
+the docker images required to run this sample.
+
+2. To run this sample, simply run the *start.sh* script.  You may do this multiple times in a row as needed
+since the *start.sh* script cleans up before starting each time.
+
+3. To stop the containers which are started by the *start.sh* script, you may run the *stop.sh* script.
+
+## Understanding this sample
+
+There are some variables at the top of *fabric-samples/fabric-ca/scripts/env.sh* script which
+define the names and topology of this sample.  You may modify these as described in the comments
+of the script in order to customize this sample.  By default, there are three organizations.
+The orderer organization is *org0*, and two peer organizations are *org1* and *org2*.
+
+The *start.sh* script first builds the *docker-compose.yml* file (by invoking the
+*makeDocker.sh* script) and then starts the docker containers.  
+Each docker container writes its logs to the *data/logs* directory.
+The *data* directory is a volume mount for all containers and is used for
+sharing data between containers.
+
+The containers defined in the *docker-compose.yml* file are started in the
+following sequence.
+
+1. The *rca* (root CA) containers start first, one for each organization.
+The root CA certificate is written to the *data* directory.
+
+2. The *ica* (Intermediate CA) containers start next.  Each of these containers
+enrolls with a corresponding root CA.  The intermediate CA certificate
+is also written to the *data* directory.
+
+3. The *setup* container registers identities with the intermediate CAs,
+generates the genesis block, and other artifacts needed to setup the
+blockchain network.  This is performed by the
+*fabric-samples/fabric-ca/scripts/run-fabric.sh* script.  Note that the
+admin identity is registered with **abac.init=true:ecert**
+(see the *registerPeerIdentities* function of this script).  This causes
+the admin's enrollment certificate (ECert) to have an attribute named "abac.init"
+with a value of "true".  Note further that the chaincode used by this sample
+requires this attribute to call its Init function (see the Init function of
+*fabric-samples/chaincode/abac/abac.go*).  For more information on
+Attribute-Based Access Control (ABAC), see
+https://github.com/hyperledger/fabric/tree/release/core/chaincode/lib/cid/README.md.
+
+4. The orderer and peer containers are started.  The naming of these containers
+is straight-forward as is their log files in the *data/logs* directory.
+
+5. The *run* container is started which runs the actual test case.  It creates
+a channel, peers join the channel, chaincode is installed and instantiated,
+and the chaincode is queried and invoked.  See the *main* function of the
+*fabric-samples/fabric-ca/scripts/run-fabric.sh* script for more details.
+
+<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>
