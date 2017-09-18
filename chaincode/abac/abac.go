@@ -21,7 +21,7 @@ import (
 	"strconv"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
-	"github.com/hyperledger/fabric/core/chaincode/shim/client"
+	"github.com/hyperledger/fabric/core/chaincode/lib/cid"
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
 
@@ -35,29 +35,14 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
 	fmt.Println("abac Init")
 
 	//
-	// Begin demonstrating the use of Attribute-Based Access Control (ABAC) by checking
+	// Demonstrate the use of Attribute-Based Access Control (ABAC) by checking
 	// to see if the caller has the "abac.init" attribute with a value of true;
 	// if not, return an error.
 	//
-
-	// 1) First get the client object
-	c, err := client.New(stub)
+	err := cid.AssertAttributeValue(stub, "abac.init", "true")
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	// 2) Next get the client's 'abac.init' attribute
-	val, _, err := c.GetAttributeValue("abac.init")
-	if err != nil {
-		return shim.Error(err.Error())
-	}
-	// 3) Make sure the value equals 'true'
-	if val != "true" {
-		return shim.Error("Access denied; client's 'abac.init' attribute value is '" + val + "', not 'true'")
-	}
-
-	//
-	// End ABAC chaincode
-	//
 
 	_, args := stub.GetFunctionAndParameters()
 	var A, B string    // Entities

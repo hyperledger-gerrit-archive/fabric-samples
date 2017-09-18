@@ -126,7 +126,7 @@ chaincodeQuery () {
       fatalr "Usage: chaincodeQuery <expected-value>"
    fi
    set +e
-   logr "Querying chaincode in channel '$CHANNEL_NAME' on peer '$PEER_HOST'; please wait ..."
+   logr "Querying chaincode in channel '$CHANNEL_NAME' on peer '$PEER_HOST' ..."
    local rc=1
    local starttime=$(date +%s)
    # Continue to poll until we get a successful response or reach QUERY_TIMEOUT

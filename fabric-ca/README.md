@@ -9,10 +9,12 @@ This sample demonstrates the following:
    attributes from the invoker's identity.  Only identity's with the "abac.init" attribute value of
    "true" can successfully call the "Init" function to instantiate the chaincode.
 
-To setup this sample, run the "setup.sh" script.  This needs to be done only once unless you change fabric or fabric-ca code.
+If you want to run this test using the latest code from the *github.com/hyperledger/fabric* and
+the *github.com/hyperledger/fabric-ca* repositories, first make sure these repositories are on
+your GOPATH and are up-to-date.  Then you may run the *build-images.sh* script.
 
-To run this sample, run the "start.sh" script.  You may do this multiple times in a row as needed.
+To run this sample, run the *start.sh* script.  You may do this multiple times in a row as needed.
 
-To stop the containers, run ``stop.sh``
+To stop the containers started the *start.sh* script, you may run *stop.sh*
 
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>
