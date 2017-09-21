@@ -25,7 +25,7 @@ function main {
    # Set ORDERER_PORT_ARGS to the args needed to communicate with the 1st orderer
    IFS=', ' read -r -a OORGS <<< "$ORDERER_ORGS"
    initOrdererVars ${OORGS[0]} 1
-   ORDERER_PORT_ARGS="-o $ORDERER_HOST:7050 --tls true --cafile $CA_CHAINFILE"
+   ORDERER_PORT_ARGS="-o $ORDERER_HOST:7050 --tls --cafile $CA_CHAINFILE"
 
    # Convert PEER_ORGS to an array named PORGS
    IFS=', ' read -r -a PORGS <<< "$PEER_ORGS"
@@ -85,10 +85,32 @@ function main {
    enrollFabricUser
    chaincodeQuery 90
 
+   # Revoke the user and generate CRL using admin's credentials
+   initOrgVars ${PORGS[0]}
+   initPeerVars ${PORGS[0]} 1
+   enrollFabricUser
+   revokeFabricUser
+   generateCRL
+
+   # Fetch config block
+   fetchConfigBlock
+
+   # Create config update envelope with CRL and update the config block of the channel
+   createConfigUpdatePayloadWithCRL
+   updateConfigBlock
+
+   # querying the chaincode should fail as the user is revoked
+   sleep 10
+   enrollFabricUser
+   set +e
+   queryAsRevokedUser
+   if [ "$?" -ne 0 ]; then
+      logr "The revoked user $USER_NAME should have failed to query the chaincode in the channel '$CHANNEL_NAME'"
+      exit 1
+   fi
    logr "Congratulations!  The tests ran successfully."
 
    done=true
-
 }
 
 # Enroll as a peer admin and create the channel
@@ -121,12 +143,12 @@ function joinChannel {
    done
 }
 
-chaincodeQuery () {
+function chaincodeQuery {
    if [ $# -ne 1 ]; then
       fatalr "Usage: chaincodeQuery <expected-value>"
    fi
    set +e
-   logr "Querying chaincode in channel '$CHANNEL_NAME' on peer '$PEER_HOST' ..."
+   logr "Querying chaincode in the channel '$CHANNEL_NAME' on the peer '$PEER_HOST' ..."
    local rc=1
    local starttime=$(date +%s)
    # Continue to poll until we get a successful response or reach QUERY_TIMEOUT
@@ -146,6 +168,24 @@ chaincodeQuery () {
    fatalr "Failed to query channel '$CHANNEL_NAME' on peer '$PEER_HOST'; expected value was $1 and found $VALUE"
 }
 
+function queryAsRevokedUser {
+   set +e
+   logr "Querying the chaincode in the channel '$CHANNEL_NAME' on the peer '$PEER_HOST' as revoked user '$USER_NAME' ..."
+   rc=0
+   peer chaincode query -C $CHANNEL_NAME -n mycc -c '{"Args":["query","a"]}' >& log.txt
+   if [ $? -eq 1 ]; then
+      err=$(cat log.txt | grep "The certificate has been revoked")
+      if [ "$err" == "" ]; then
+         rc=1
+         cat log.txt
+         cat log.txt >> $RUN_SUMFILE
+      else
+         logr "Expected error occurred when the revoked user '$USER_NAME' queried the chaincode in the channel '$CHANNEL_NAME'"
+      fi
+   fi
+   set -e 
+   return $rc
+}
 
 function makePolicy  {
    POLICY="OR("
@@ -166,6 +206,53 @@ function installChaincode {
    enrollFabricAdmin
    logr "Installing chaincode on $PEER_HOST ..."
    peer chaincode install -n mycc -v 1.0 -p github.com/hyperledger/fabric-samples/chaincode/abac
+}
+
+function fetchConfigBlock {
+   logr "Fetching the configuration block of the channel '$CHANNEL_NAME'"
+   peer channel fetch config $CONFIG_BLOCK_FILE -c $CHANNEL_NAME $ORDERER_PORT_ARGS
+}
+
+function updateConfigBlock {
+   logr "Updating the configuration block of the channel '$CHANNEL_NAME'"
+   peer channel update -f $CONFIG_UPDATE_ENVELOPE_FILE -c $CHANNEL_NAME $ORDERER_PORT_ARGS
+}
+
+function createConfigUpdatePayloadWithCRL {
+   logr "Creating config update payload with the generated CRL for the organization '$ORG'"
+   # Start the configtxlator
+   configtxlator start &
+   configtxlator_pid=$!
+   echo "configtxlator_pid:$configtxlator_pid"
+   sleep 10
+
+   pushd /tmp
+
+   # Convert the config block protobuf to JSON
+   curl -X POST --data-binary @$CONFIG_BLOCK_FILE http://127.0.0.1:7059/protolator/decode/common.Block > config_block.json
+   # Extract the config from the config block
+   jq .data.data[0].payload.data.config config_block.json > config.json
+
+   # Update crl in the config json
+   crl=$(cat $CORE_PEER_MSPCONFIGPATH/crls/crl*.pem | base64 | tr -d '\n')
+   cat config.json | jq '.channel_group.groups.Application.groups.'"${ORG}"'.values.MSP.value.config.revocation_list = ["'"${crl}"'"]' > updated_config.json
+
+   # Create the config diff protobuf
+   curl -X POST --data-binary @config.json http://127.0.0.1:7059/protolator/encode/common.Config > config.pb
+   curl -X POST --data-binary @updated_config.json http://127.0.0.1:7059/protolator/encode/common.Config > updated_config.pb
+   curl -X POST -F original=@config.pb -F updated=@updated_config.pb http://127.0.0.1:7059/configtxlator/compute/update-from-configs -F channel=$CHANNEL_NAME > config_update.pb
+
+   # Convert the config diff protobuf to JSON
+   curl -X POST --data-binary @config_update.pb http://127.0.0.1:7059/protolator/decode/common.ConfigUpdate > config_update.json
+
+   # Create envelope protobuf container config diff to be used in the "peer channel update" command to update the channel configuration block
+   echo '{"payload":{"header":{"channel_header":{"channel_id":"'"${CHANNEL_NAME}"'", "type":2}},"data":{"config_update":'$(cat config_update.json)'}}}' > config_update_as_envelope.json
+   curl -X POST --data-binary @config_update_as_envelope.json http://127.0.0.1:7059/protolator/encode/common.Envelope > $CONFIG_UPDATE_ENVELOPE_FILE
+
+   # Stop configtxlator
+   kill $configtxlator_pid
+
+   popd
 }
 
 function finish {
