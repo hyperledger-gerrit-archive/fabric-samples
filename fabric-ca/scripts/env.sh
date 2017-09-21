@@ -73,6 +73,13 @@ export FABRIC_CA_CLIENT_ID_AFFILIATION=org1
 # Set to true to enable use of intermediate CAs
 USE_INTERMEDIATE_CA=true
 
+
+# Config block file path
+CONFIG_BLOCK_FILE=/tmp/config_block.pb
+
+# Update config block payload file path
+CONFIG_UPDATE_ENVELOPE_FILE=/tmp/config_update_as_envelope.pb
+
 # initOrgVars <ORG>
 function initOrgVars {
    if [ $# -ne 1 ]; then
@@ -226,7 +233,7 @@ function enrollFabricAdmin {
 function enrollFabricUser {
    export FABRIC_CA_CLIENT_HOME=/etc/hyperledger/fabric/orgs/$ORG/user
    export CORE_PEER_MSPCONFIGPATH=$FABRIC_CA_CLIENT_HOME/msp
-   if [ ! -f $FABRIC_CA_CLIENT_HOME ]; then
+   if [ ! -d "$FABRIC_CA_CLIENT_HOME" ]; then
       dowait "$CA_NAME to start" 10 $CA_LOGFILE $CA_CHAINFILE
       log "Enrolling user for organization $ORG with home directory $FABRIC_CA_CLIENT_HOME ..."
       export FABRIC_CA_CLIENT_TLS_CERTFILES=$CA_CHAINFILE
@@ -238,6 +245,25 @@ function enrollFabricUser {
          cp $ORG_ADMIN_HOME/msp/signcerts/* $ACDIR
       fi
    fi
+}
+
+# Revokes the fabric user
+function revokeFabricUser {
+   enrollFabricAdmin
+   export  FABRIC_CA_CLIENT_HOME=$ORG_ADMIN_HOME
+   logr "Revoking the user '$USER_NAME' of the organization '$ORG' with Fabric CA Client home directory set to $FABRIC_CA_CLIENT_HOME ..."
+   export FABRIC_CA_CLIENT_TLS_CERTFILES=$CA_CHAINFILE
+   fabric-ca-client revoke -d --revoke.name $USER_NAME
+}
+
+# Generates a CRL that contains all revoked user certificate serial numbers. 
+# The generated CRL is placed in the crls folder of the admin's MSP
+function generateCRL {
+   enrollFabricAdmin
+   export FABRIC_CA_CLIENT_HOME=$ORG_ADMIN_HOME
+   logr "Generating CRL for the organization '$ORG' with Fabric CA Client home directory set to $FABRIC_CA_CLIENT_HOME ..."
+   export FABRIC_CA_CLIENT_TLS_CERTFILES=$CA_CHAINFILE
+   fabric-ca-client gencrl -d
 }
 
 # Copy the org's admin cert into some target MSP directory
