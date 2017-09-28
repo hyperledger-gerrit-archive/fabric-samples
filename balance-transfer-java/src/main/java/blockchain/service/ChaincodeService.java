@@ -7,10 +7,11 @@ package blockchain.service;
 import org.hyperledger.fabric.sdk.Channel;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.http.ResponseEntity;
 import org.hyperledger.fabric.sdk.BlockEvent.TransactionEvent;
 
-import blockchain.config.Org;
-import blockchain.config.HyperUser;
+import blockchain.model.Org;
+import blockchain.model.HyperUser;
 
 /**
  * 
@@ -30,7 +31,7 @@ public interface ChaincodeService {
 
 	public String enrollAndRegister(String uname);
 
-	public Channel constructChannel() throws Exception;
+	public String constructChannel() throws Exception;
 
 	public String installChaincode(String chaincodeName);
 

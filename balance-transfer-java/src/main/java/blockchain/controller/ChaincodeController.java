@@ -6,8 +6,6 @@ package blockchain.controller;
 
 import java.util.Date;
 import org.hyperledger.fabric.sdk.Channel;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.google.gson.JsonObject;
-
 import blockchain.dto.FunctionAndArgsDto;
 import blockchain.dto.ChaincodeNameDto;
 import blockchain.dto.UserDto;
@@ -29,7 +24,7 @@ import blockchain.filter.JwtFilter;
 import blockchain.service.ChaincodeService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.swagger.annotations.Authorization;
+
 
 @RestController
 public class ChaincodeController {
@@ -51,8 +46,9 @@ public class ChaincodeController {
 	 *            of the user registered and enrolled in blockchain.
 	 * @return the status as string
 	 */
+
 	@RequestMapping(value = "/enroll", method = RequestMethod.POST)
-	public String enroll(@RequestBody UserDto user) {
+	public ResponseEntity<String> enroll(@RequestBody UserDto user) {
 
 		String result = chaincodeService.enrollAndRegister(user.getUsername());
 		if (result != "Failed to enroll user") {
@@ -60,19 +56,24 @@ public class ChaincodeController {
 			String jwtToken = "";
 
 			if (user.getUsername() == null) {
-				return "please enter username in request body";
+				return ResponseEntity
+						.status(HttpStatus.FORBIDDEN)
+						.body("please enter username in request body");
 			}
 
 			String username = user.getUsername();
 
 			jwtToken = Jwts.builder().setSubject(username).claim("roles", "user").setIssuedAt(new Date())
 					.signWith(SignatureAlgorithm.HS256, "secretkey").compact();
-
-			return result + "  jwt:" + jwtToken;
+			return ResponseEntity
+					.status(HttpStatus.OK)
+					.body(result + "  jwt:" + jwtToken);
 
 		}
 
-		return "something went wrong";
+		return ResponseEntity
+				.status(HttpStatus.FORBIDDEN)
+				.body("Something went wrong");
 
 	}
 
@@ -84,15 +85,30 @@ public class ChaincodeController {
 	 * @returns the channel that has been created
 	 */
 	@RequestMapping(value = "/api/construct", method = RequestMethod.POST)
-	public Channel createChannel(@RequestHeader String Authorization) throws Exception {
+	public ResponseEntity<String> createChannel(@RequestHeader String Authorization) throws Exception {
 		String uname = JwtFilter.uname;
 		logger.debug(uname);
 		String result = chaincodeService.enrollAndRegister(uname);
 		if (result != "Failed to enroll user") {
+			String response=chaincodeService.constructChannel();
+			if(response=="Channel created successfully")
+			{
+				return ResponseEntity
+						.status(HttpStatus.OK)
 
-			return chaincodeService.constructChannel();
+						.body("channel created successfully");
+			}
+			else
+			{
+				return ResponseEntity
+						.status(HttpStatus.FORBIDDEN)
+						.body("Something went wrong");
+			}
+
 		} else {
-			return null;
+			return ResponseEntity
+					.status(HttpStatus.FORBIDDEN)
+					.body("Something went wrong");
 		}
 	}
 
@@ -105,16 +121,26 @@ public class ChaincodeController {
 	 * @returns the channel that has been recreated
 	 */
 	@RequestMapping(value = "/api/reconstruct", method = RequestMethod.PUT)
-	public Channel recreateChannel(@RequestHeader String Authorization) throws Exception {
+	public ResponseEntity<String> recreateChannel(@RequestHeader String Authorization) throws Exception {
 
 		String uname = JwtFilter.uname;
 
 		String result = chaincodeService.enrollAndRegister(uname);
 		if (result != "Failed to enroll user") {
-
-			return chaincodeService.reconstructChannel();
+			Channel ch =chaincodeService.reconstructChannel();
+			if(ch==null)
+			{
+				return ResponseEntity
+						.status(HttpStatus.FORBIDDEN)
+						.body("Channel recreation failed");
+			}
+			return ResponseEntity
+					.status(HttpStatus.OK)
+					.body("Channel recreated successfully");
 		} else {
-			return null;
+			return ResponseEntity
+					.status(HttpStatus.FORBIDDEN)
+					.body("Something went wrong");
 		}
 	}
 
@@ -128,14 +154,27 @@ public class ChaincodeController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/api/install", method = RequestMethod.POST)
-	public String installChaincode(@RequestBody ChaincodeNameDto chaincodeName, @RequestHeader String Authorization)
+	public ResponseEntity<String> installChaincode(@RequestBody ChaincodeNameDto chaincodeName, @RequestHeader String Authorization)
 			throws Exception {
 		String uname = JwtFilter.uname;
 		String result = chaincodeService.enrollAndRegister(uname);
 		if (result != "Failed to enroll user") {
-			return chaincodeService.installChaincode(chaincodeName.getChaincodeName());
+			String response=chaincodeService.installChaincode(chaincodeName.getChaincodeName());
+			if(response=="Chaincode installed successfully")
+			{
+				return ResponseEntity
+						.status(HttpStatus.OK)
+						.body(response);
+			}
+			else {
+				return ResponseEntity
+						.status(HttpStatus.FORBIDDEN)
+						.body(response);
+			}
 		} else {
-			return null;
+			return ResponseEntity
+					.status(HttpStatus.FORBIDDEN)
+					.body("Something went wrong");
 		}
 	}
 
@@ -147,22 +186,42 @@ public class ChaincodeController {
 	 * @return status as string
 	 */
 	@RequestMapping(value = "/api/instantiate", method = RequestMethod.POST)
-	public String instantiateChaincode(@RequestBody FunctionAndArgsDto chaincodeDto,
+	public ResponseEntity<String> instantiateChaincode(@RequestBody FunctionAndArgsDto chaincodeDto,
 			@RequestHeader String Authorization) throws Exception {
 
 		if ((chaincodeDto.getFunction()) == null) {
-			return "function not present in method body";
+			return ResponseEntity
+					.status(HttpStatus.FORBIDDEN)
+					.body("function not present in method body");
 		}
 		if (chaincodeDto.getArgs() == null) {
-			return "args not present in method body";
+			return ResponseEntity
+					.status(HttpStatus.FORBIDDEN)
+					.body("args not present in method body");
 		}
 		String uname = JwtFilter.uname;
 		String result = chaincodeService.enrollAndRegister(uname);
 		if (result != "Failed to enroll user") {
-			return chaincodeService.instantiateChaincode(chaincodeDto.getChaincodeName(), chaincodeDto.getFunction(),
+			String response=chaincodeService.instantiateChaincode(chaincodeDto.getChaincodeName(), chaincodeDto.getFunction(),
 					chaincodeDto.getArgs());
+			if(response=="Chaincode instantiated Successfully")
+			{
+				return ResponseEntity
+
+						.status(HttpStatus.OK)
+						.body(response);
+			}
+			else {
+				return ResponseEntity
+						.status(HttpStatus.FORBIDDEN)
+						.body(response);
+			}
+
+
 		} else {
-			return null;
+			return ResponseEntity
+					.status(HttpStatus.FORBIDDEN)
+					.body("Something went wrong");
 		}
 	}
 
@@ -174,22 +233,39 @@ public class ChaincodeController {
 	 * @return status as string
 	 */
 	@RequestMapping(value = "/api/invoke", method = RequestMethod.POST)
-	public String invokeChaincode(@RequestBody FunctionAndArgsDto chaincodeDto, @RequestHeader String Authorization)
+	public ResponseEntity<String> invokeChaincode(@RequestBody FunctionAndArgsDto chaincodeDto, @RequestHeader String Authorization)
 			throws Exception {
 		if ((chaincodeDto.getFunction()) == null) {
-			return "function not present in method body";
+			return ResponseEntity
+					.status(HttpStatus.FORBIDDEN)
+					.body("function not present in method body");
 		}
 		if (chaincodeDto.getArgs() == null) {
-			return "args not present in method body";
+			return ResponseEntity
+					.status(HttpStatus.FORBIDDEN)
+					.body("args not present in method body");
 		}
 		String uname = JwtFilter.uname;
 		String result = chaincodeService.enrollAndRegister(uname);
 		if (result != "Failed to enroll user") {
-
-			return chaincodeService.invokeChaincode(chaincodeDto.getChaincodeName(), chaincodeDto.getFunction(),
+			String response=chaincodeService.invokeChaincode(chaincodeDto.getChaincodeName(), chaincodeDto.getFunction(),
 					chaincodeDto.getArgs());
+			if(response=="Transaction invoked successfully")
+			{
+				return ResponseEntity
+						.status(HttpStatus.OK)
+						.body(response);
+			}
+			else
+			{
+				return ResponseEntity
+						.status(HttpStatus.FORBIDDEN)
+						.body(response);
+			}
 		} else {
-			return null;
+			return ResponseEntity
+					.status(HttpStatus.FORBIDDEN)
+					.body("Something went wrong");
 		}
 	}
 
@@ -202,7 +278,7 @@ public class ChaincodeController {
 	 * @return payload returned from the chaincode
 	 */
 	@RequestMapping(value = "/api/query", method = RequestMethod.GET)
-	public String queryChaincode(@RequestParam("ChaincodeName") String ChaincodeName,
+	public ResponseEntity<String> queryChaincode(@RequestParam("ChaincodeName") String ChaincodeName,
 			@RequestParam("function") String ChaincodeFunction, @RequestParam("args") String[] ChaincodeArgs,
 			@RequestHeader String Authorization) throws Exception {
 		String uname = JwtFilter.uname;
@@ -211,11 +287,23 @@ public class ChaincodeController {
 		if (result != "Failed to enroll user") {
 
 			String response = chaincodeService.queryChaincode(ChaincodeName, ChaincodeFunction, ChaincodeArgs);
+			if(response !="Caught an exception while quering chaincode")
+			{
+				return ResponseEntity
+						.status(HttpStatus.OK)
+						.body(response);
+			}
+			else
+			{
+				return ResponseEntity
+						.status(HttpStatus.FORBIDDEN)
+						.body(response);
+			}
 
-			return response;
-			
 		} else {
-			return null;
+			return ResponseEntity
+					.status(HttpStatus.FORBIDDEN)
+					.body("Something went wrong");
 		}
 	}
 
