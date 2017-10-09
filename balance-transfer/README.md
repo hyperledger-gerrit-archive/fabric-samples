@@ -144,9 +144,12 @@ curl -s -X POST \
 	"peers": ["peer1","peer2"],
 	"chaincodeName":"mycc",
 	"chaincodePath":"github.com/example_cc",
+	"chaincodeType": "golang",
 	"chaincodeVersion":"v0"
 }'
 ```
+**NOTE:** *chaincodePath* & *chaincodeType* attributes needs to be changed accordingly
+when node.js chaincode is used
 
 ### Instantiate chaincode
 
@@ -158,9 +161,11 @@ curl -s -X POST \
   -d '{
 	"chaincodeName":"mycc",
 	"chaincodeVersion":"v0",
+	"chaincodeType": "golang",
 	"args":["a","100","b","200"]
 }'
 ```
+**NOTE:** *chaincodeType* must be set to **node** when node.js chaincode is used
 
 ### Invoke request
 
