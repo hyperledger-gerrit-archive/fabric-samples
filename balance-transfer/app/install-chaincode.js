@@ -21,21 +21,25 @@ var config = require('../config.json');
 var helper = require('./helper.js');
 var logger = helper.getLogger('install-chaincode');
 var tx_id = null;
-//function installChaincode(org) {
+
 var installChaincode = function(peers, chaincodeName, chaincodePath,
-	chaincodeVersion, username, org) {
+	chaincodeVersion, chaincodeType, username, org) {
 	logger.debug(
 		'\n============ Install chaincode on organizations ============\n');
 	helper.setupChaincodeDeploy();
 	var channel = helper.getChannelForOrg(org);
 	var client = helper.getClientForOrg(org);
+	if (chaincodeType.toUpperCase() === 'node'.toUpperCase()){
+		chaincodePath = path.join(__dirname, chaincodePath);
+	}
 
 	return helper.getOrgAdmin(org).then((user) => {
 		var request = {
 			targets: helper.newPeers(peers, org),
 			chaincodePath: chaincodePath,
 			chaincodeId: chaincodeName,
-			chaincodeVersion: chaincodeVersion
+			chaincodeVersion: chaincodeVersion,
+			chaincodeType: chaincodeType
 		};
 		return client.installChaincode(request);
 	}, (err) => {
