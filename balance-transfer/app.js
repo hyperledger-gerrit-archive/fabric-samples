@@ -154,7 +154,7 @@ app.post('/channels', function(req, res) {
 		return;
 	}
 
-	channels.createChannel(channelName, channelConfigPath, req.username, req.orgname)
+	channels.createChannel(channelName, channelConfigPath, req.orgname)
 	.then(function(message) {
 		res.send(message);
 	});
@@ -175,7 +175,7 @@ app.post('/channels/:channelName/peers', function(req, res) {
 		return;
 	}
 
-	join.joinChannel(channelName, peers, req.username, req.orgname)
+	join.joinChannel(channelName, peers, req.orgname)
 	.then(function(message) {
 		res.send(message);
 	});
@@ -208,7 +208,7 @@ app.post('/chaincodes', function(req, res) {
 		return;
 	}
 
-	install.installChaincode(peers, chaincodeName, chaincodePath, chaincodeVersion, req.username, req.orgname)
+	install.installChaincode(peers, chaincodeName, chaincodePath, chaincodeVersion, req.orgname)
 	.then(function(message) {
 		res.send(message);
 	});
@@ -242,7 +242,7 @@ app.post('/channels/:channelName/chaincodes', function(req, res) {
 		res.json(getErrorMessage('\'args\''));
 		return;
 	}
-	instantiate.instantiateChaincode(channelName, chaincodeName, chaincodeVersion, fcn, args, req.username, req.orgname)
+	instantiate.instantiateChaincode(channelName, chaincodeName, chaincodeVersion, fcn, args, req.orgname)
 	.then(function(message) {
 		res.send(message);
 	});
@@ -397,7 +397,7 @@ app.get('/chaincodes', function(req, res) {
 			'================ GET INSTANTIATED CHAINCODES ======================');
 	}
 
-	query.getInstalledChaincodes(peer, installType, req.username, req.orgname)
+	query.getInstalledChaincodes(peer, installType, req.orgname)
 	.then(function(message) {
 		res.send(message);
 	});

@@ -178,7 +178,7 @@ var getChainInfo = function(peer, username, org) {
 	});
 };
 //getInstalledChaincodes
-var getInstalledChaincodes = function(peer, type, username, org) {
+var getInstalledChaincodes = function(peer, type, org) {
 	var target = buildTarget(peer, org);
 	var channel = helper.getChannelForOrg(org);
 	var client = helper.getClientForOrg(org);
@@ -190,8 +190,8 @@ var getInstalledChaincodes = function(peer, type, username, org) {
 			return channel.queryInstantiatedChaincodes(target);
 		}
 	}, (err) => {
-		logger.info('Failed to get submitter "' + username + '"');
-		return 'Failed to get submitter "' + username + '". Error: ' + err.stack ?
+		logger.info('Failed to get admin user for the organization "' + org + '"');
+		return 'Failed to get admin user for the organization "' + org + '". Error: ' + err.stack ?
 			err.stack : err;
 	}).then((response) => {
 		if (response) {
