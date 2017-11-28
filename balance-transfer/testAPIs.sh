@@ -158,6 +158,7 @@ curl -s -X POST \
 }"
 echo
 echo
+sleep 10
 
 echo "POST invoke chaincode on peers of Org1 and Org2"
 echo
