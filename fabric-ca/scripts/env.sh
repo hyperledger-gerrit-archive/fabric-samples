@@ -172,6 +172,23 @@ function initOrdererVars {
    export ORDERER_GENERAL_TLS_ROOTCAS=[$INT_CA_CHAINFILE]
 }
 
+function genClientTLSCert {
+   if [ $# -ne 1 ]; then
+      echo "Usage: genClientTLSCert <PeerName>: $*"
+      exit 1
+   fi
+
+   PEER_NAME=$1
+
+   # Get a client cert
+   fabric-ca-client enroll -d --enrollment.profile tls -u $ENROLLMENT_URL -M /tmp/tls --csr.hosts $PEER_NAME
+
+   mkdir /$DATA/tls || true
+   cp /tmp/tls/signcerts/* $CORE_PEER_TLS_CLIENTCERT_FILE
+   cp /tmp/tls/keystore/* $CORE_PEER_TLS_CLIENTKEY_FILE
+   rm -rf /tmp/tls
+}
+
 # initPeerVars <ORG> <NUM>
 function initPeerVars {
    if [ $# -ne 2 ]; then
@@ -201,10 +218,11 @@ function initPeerVars {
    # export CORE_LOGGING_LEVEL=ERROR
    export CORE_LOGGING_LEVEL=DEBUG
    export CORE_PEER_TLS_ENABLED=true
-   export CORE_PEER_PROFILE_ENABLED=true
-   export CORE_PEER_TLS_CERT_FILE=$TLSDIR/server.crt
-   export CORE_PEER_TLS_KEY_FILE=$TLSDIR/server.key
+   export CORE_PEER_TLS_CLIENTAUTHREQUIRED=true
    export CORE_PEER_TLS_ROOTCERT_FILE=$INT_CA_CHAINFILE
+   export CORE_PEER_TLS_CLIENTCERT_FILE=/$DATA/tls/$PEER_NAME-client.crt
+   export CORE_PEER_TLS_CLIENTKEY_FILE=/$DATA/tls/$PEER_NAME-client.key
+   export CORE_PEER_PROFILE_ENABLED=true
    # gossip variables
    export CORE_PEER_GOSSIP_USELEADERELECTION=true
    export CORE_PEER_GOSSIP_ORGLEADER=false
