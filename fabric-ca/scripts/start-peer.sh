@@ -21,6 +21,8 @@ cp /tmp/tls/signcerts/* $CORE_PEER_TLS_CERT_FILE
 cp /tmp/tls/keystore/* $CORE_PEER_TLS_KEY_FILE
 rm -rf /tmp/tls
 
+genClientTLSCert $PEER_NAME
+
 # Enroll the peer to get an enrollment certificate and set up the core's local MSP directory
 fabric-ca-client enroll -d -u $ENROLLMENT_URL -M $CORE_PEER_MSPCONFIGPATH
 finishMSPSetup $CORE_PEER_MSPCONFIGPATH
