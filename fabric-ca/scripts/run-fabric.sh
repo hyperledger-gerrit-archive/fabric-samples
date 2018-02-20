@@ -25,7 +25,7 @@ function main {
    # Set ORDERER_PORT_ARGS to the args needed to communicate with the 1st orderer
    IFS=', ' read -r -a OORGS <<< "$ORDERER_ORGS"
    initOrdererVars ${OORGS[0]} 1
-   ORDERER_PORT_ARGS="-o $ORDERER_HOST:7050 --tls --cafile $CA_CHAINFILE"
+   ORDERER_PORT_ARGS="-o $ORDERER_HOST:7050 --tls --cafile $CA_CHAINFILE --clientauth"
 
    # Convert PEER_ORGS to an array named PORGS
    IFS=', ' read -r -a PORGS <<< "$PEER_ORGS"
@@ -48,7 +48,8 @@ function main {
       initPeerVars $ORG 1
       switchToAdminIdentity
       logr "Updating anchor peers for $PEER_HOST ..."
-      peer channel update -c $CHANNEL_NAME -f $ANCHOR_TX_FILE $ORDERER_PORT_ARGS
+      local ordererArgs="$ORDERER_PORT_ARGS --keyfile /$DATA/tls/$PEER_NAME-cli-client.key --certfile /$DATA/tls/$PEER_NAME-cli-client.crt"
+      peer channel update -c $CHANNEL_NAME -f $ANCHOR_TX_FILE $ordererArgs
    done
 
    # Install chaincode on the 1st peer in each org
@@ -62,7 +63,8 @@ function main {
    initPeerVars ${PORGS[1]} 1
    switchToAdminIdentity
    logr "Instantiating chaincode on $PEER_HOST ..."
-   peer chaincode instantiate -C $CHANNEL_NAME -n mycc -v 1.0 -c '{"Args":["init","a","100","b","200"]}' -P "$POLICY" $ORDERER_PORT_ARGS
+   local ordererArgs="$ORDERER_PORT_ARGS --keyfile /$DATA/tls/$PEER_NAME-cli-client.key --certfile /$DATA/tls/$PEER_NAME-cli-client.crt"
+   peer chaincode instantiate -C $CHANNEL_NAME -n mycc -v 1.0 -c '{"Args":["init","a","100","b","200"]}' -P "$POLICY" $ordererArgs
 
    # Query chaincode from the 1st peer of the 1st org
    initPeerVars ${PORGS[0]} 1
@@ -73,7 +75,8 @@ function main {
    initPeerVars ${PORGS[0]} 1
    switchToUserIdentity
    logr "Sending invoke transaction to $PEER_HOST ..."
-   peer chaincode invoke -C $CHANNEL_NAME -n mycc -c '{"Args":["invoke","a","b","10"]}' $ORDERER_PORT_ARGS
+   local ordererArgs="$ORDERER_PORT_ARGS --keyfile /$DATA/tls/$PEER_NAME-cli-client.key --certfile /$DATA/tls/$PEER_NAME-cli-client.crt"
+   peer chaincode invoke -C $CHANNEL_NAME -n mycc -c '{"Args":["invoke","a","b","10"]}' $ordererArgs
 
    ## Install chaincode on 2nd peer of 2nd org
    initPeerVars ${PORGS[1]} 2
@@ -116,7 +119,8 @@ function createChannel {
    initPeerVars ${PORGS[0]} 1
    switchToAdminIdentity
    logr "Creating channel '$CHANNEL_NAME' on $ORDERER_HOST ..."
-   peer channel create --logging-level=DEBUG -c $CHANNEL_NAME -f $CHANNEL_TX_FILE $ORDERER_PORT_ARGS
+   local ordererArgs="$ORDERER_PORT_ARGS --keyfile /$DATA/tls/$PEER_NAME-cli-client.key --certfile /$DATA/tls/$PEER_NAME-cli-client.crt"
+   peer channel create --logging-level=DEBUG -c $CHANNEL_NAME -f $CHANNEL_TX_FILE $ordererArgs
 }
 
 # Enroll as a fabric admin and join the channel
@@ -213,12 +217,14 @@ function installChaincode {
 
 function fetchConfigBlock {
    logr "Fetching the configuration block of the channel '$CHANNEL_NAME'"
-   peer channel fetch config $CONFIG_BLOCK_FILE -c $CHANNEL_NAME $ORDERER_PORT_ARGS
+   local ordererArgs="$ORDERER_PORT_ARGS --keyfile /$DATA/tls/$PEER_NAME-cli-client.key --certfile /$DATA/tls/$PEER_NAME-cli-client.crt"
+   peer channel fetch config $CONFIG_BLOCK_FILE -c $CHANNEL_NAME $ordererArgs
 }
 
 function updateConfigBlock {
    logr "Updating the configuration block of the channel '$CHANNEL_NAME'"
-   peer channel update -f $CONFIG_UPDATE_ENVELOPE_FILE -c $CHANNEL_NAME $ORDERER_PORT_ARGS
+   local ordererArgs="$ORDERER_PORT_ARGS --keyfile /$DATA/tls/$PEER_NAME-cli-client.key --certfile /$DATA/tls/$PEER_NAME-cli-client.crt"
+   peer channel update -f $CONFIG_UPDATE_ENVELOPE_FILE -c $CHANNEL_NAME $ordererArgs
 }
 
 function createConfigUpdatePayloadWithCRL {
