@@ -156,7 +156,7 @@ chaincodeQuery () {
      sleep $DELAY
      echo "Attempting to Query peer${PEER}.org${ORG} ...$(($(date +%s)-starttime)) secs"
      peer chaincode query -C $CHANNEL_NAME -n mycc -c '{"Args":["query","a"]}' >&log.txt
-     test $? -eq 0 && VALUE=$(cat log.txt | awk '/Query Result/ {print $NF}')
+     test $? -eq 0 && VALUE=$(cat log.txt | egrep '^[0-9]+$') 
      test "$VALUE" = "$EXPECTED_RESULT" && let rc=0
   done
   echo
