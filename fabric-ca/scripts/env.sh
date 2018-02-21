@@ -276,9 +276,9 @@ function switchToUserIdentity {
 function revokeFabricUser {
    switchToAdminIdentity
    export  FABRIC_CA_CLIENT_HOME=$ORG_ADMIN_HOME
-   logr "Revoking the user '$USER_NAME' of the organization '$ORG' with Fabric CA Client home directory set to $FABRIC_CA_CLIENT_HOME ..."
+   logr "Revoking the user '$USER_NAME' of the organization '$ORG' with Fabric CA Client home directory set to $FABRIC_CA_CLIENT_HOME and generating CRL ..."
    export FABRIC_CA_CLIENT_TLS_CERTFILES=$CA_CHAINFILE
-   fabric-ca-client revoke -d --revoke.name $USER_NAME
+   fabric-ca-client revoke -d --revoke.name $USER_NAME --gencrl
 }
 
 # Generates a CRL that contains serial numbers of all revoked enrollment certificates.
