@@ -34,7 +34,7 @@ export FABRIC_CFG_PATH=${PWD}
 # Print the usage message
 function printHelp () {
   echo "Usage: "
-  echo "  byfn.sh up|down|restart|generate [-c <channel name>] [-t <timeout>] [-d <delay>] [-f <docker-compose-file>] [-s <dbtype>]"
+  echo "  byfn.sh up|down|restart|generate|upgrade [-c <channel name>] [-t <timeout>] [-d <delay>] [-f <docker-compose-file>] [-s <dbtype>]"
   echo "  byfn.sh -h|--help (print this message)"
   echo "    <mode> - one of 'up', 'down', 'restart' or 'generate'"
   echo "      - 'up' - bring up the network with docker-compose up"
@@ -112,9 +112,9 @@ function networkUp () {
     generateChannelArtifacts
   fi
   if [ "${IF_COUCHDB}" == "couchdb" ]; then
-      docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_COUCH up -d 2>&1
+      IMAGE_TAG=$IMAGETAG docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_COUCH up -d 2>&1
   else
-      docker-compose -f $COMPOSE_FILE up -d 2>&1
+      IMAGE_TAG=$IMAGETAG docker-compose -f $COMPOSE_FILE up -d 2>&1
   fi
   if [ $? -ne 0 ]; then
     echo "ERROR !!!! Unable to start network"
@@ -127,6 +127,29 @@ function networkUp () {
     exit 1
   fi
 }
+
+function upgradeNetwork () {
+  echo "Stopping Orderer and Copying Ledger"
+  docker stop orderer.example.com
+  docker cp orderer.example.com:/var/hyperledger/production/orderer ./orderer.example.com/
+  echo "Stopping Peers and Copying Ledger"
+  for peer in peer0.org1.example.com peer1.org1.example.com peer0.org2.example.com peer1.org2.example.com
+  do
+    docker stop $peer
+    docker cp $peer:/var/hyperledger/production ./$peer/
+  done
+  ##Cleanup the chaincode containers
+  docker rm -f dev-peer1.org2.example.com-mycc-1.0 dev-peer0.org1.example.com-mycc-1.0 dev-peer0.org2.example.com-mycc-1.0
+  ##Cleanup images
+  removeUnwantedImages  
+  IMAGE_TAG=$IMAGETAG docker-compose -f docker-compose-backup.yaml up -d
+  docker exec cli scripts/testupgrade.sh $CHANNEL_NAME $CLI_DELAY $LANGUAGE $CLI_TIMEOUT
+  if [ $? -ne 0 ]; then
+    echo "ERROR !!!! Test failed"
+    exit 1
+  fi
+}
+
 
 # Tear down running network
 function networkDown () {
@@ -322,6 +345,8 @@ COMPOSE_FILE=docker-compose-cli.yaml
 COMPOSE_FILE_COUCH=docker-compose-couch.yaml
 # use golang as the default language for chaincode
 LANGUAGE=golang
+# default image tag
+IMAGETAG=latest
 # Parse commandline args
 if [ "$1" = "-m" ];then	# supports old usage, muscle memory is powerful!
     shift
@@ -336,12 +361,14 @@ elif [ "$MODE" == "restart" ]; then
   EXPMODE="Restarting"
 elif [ "$MODE" == "generate" ]; then
   EXPMODE="Generating certs and genesis block for"
+elif [ "$MODE" == "upgrade" ]; then
+  EXPMODE="Upgrading the network"
 else
   printHelp
   exit 1
 fi
 
-while getopts "h?c:t:d:f:s:l:" opt; do
+while getopts "h?c:t:d:f:s:l:i:" opt; do
   case "$opt" in
     h|\?)
       printHelp
@@ -358,6 +385,8 @@ while getopts "h?c:t:d:f:s:l:" opt; do
     s)  IF_COUCHDB=$OPTARG
     ;;
     l)  LANGUAGE=$OPTARG
+    ;;
+    i)  IMAGE_TAG=$OPTARG
     ;;
   esac
 done
@@ -385,6 +414,9 @@ elif [ "${MODE}" == "generate" ]; then ## Generate Artifacts
 elif [ "${MODE}" == "restart" ]; then ## Restart the network
   networkDown
   networkUp
+elif [ "${MODE}" == "upgrade" ]; then ## Upgrade the network from v1.0.x to v1.1
+  #networkUp
+  upgradeNetwork
 else
   printHelp
   exit 1
