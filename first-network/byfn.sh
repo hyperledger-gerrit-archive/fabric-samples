@@ -34,13 +34,14 @@ export FABRIC_CFG_PATH=${PWD}
 # Print the usage message
 function printHelp () {
   echo "Usage: "
-  echo "  byfn.sh up|down|restart|generate [-c <channel name>] [-t <timeout>] [-d <delay>] [-f <docker-compose-file>] [-s <dbtype>] [-i <imagetag>]"
+  echo "  byfn.sh up|down|restart|generate|upgrade [-c <channel name>] [-t <timeout>] [-d <delay>] [-f <docker-compose-file>] [-s <dbtype>] [-i <imagetag>]"
   echo "  byfn.sh -h|--help (print this message)"
   echo "    <mode> - one of 'up', 'down', 'restart' or 'generate'"
   echo "      - 'up' - bring up the network with docker-compose up"
   echo "      - 'down' - clear the network with docker-compose down"
   echo "      - 'restart' - restart the network"
   echo "      - 'generate' - generate required certificates and genesis block"
+  echo "      - 'upgrade'  - upgrade the network from v1.0.x to v1.1"
   echo "    -c <channel name> - channel name to use (defaults to \"mychannel\")"
   echo "    -t <timeout> - CLI timeout duration in seconds (defaults to 10)"
   echo "    -d <delay> - delay duration in seconds (defaults to 3)"
@@ -57,6 +58,7 @@ function printHelp () {
   echo "        byfn.sh up -c mychannel -s couchdb -i 1.1.0-alpha"
   echo "	byfn.sh up -l node"
   echo "	byfn.sh down -c mychannel"
+  echo "        byfn.sh upgrade -c mychannel"
   echo
   echo "Taking all defaults:"
   echo "	byfn.sh generate"
@@ -129,6 +131,33 @@ function networkUp () {
     exit 1
   fi
 }
+
+# Upgrade the network from v1.0.x to v1.1
+# Stop the orderer and peers, backup the ledger from orderer and peers, cleanup chaincode containers and images
+# and relaunch the orderer and peers with latest tag
+function upgradeNetwork () {
+  # Stopping Orderer and Copying Ledger
+  docker stop orderer.example.com
+  docker cp orderer.example.com:/var/hyperledger/production/orderer ./orderer.example.com/
+  IMAGE_TAG=$IMAGETAG docker-compose -f docker-compose-backup.yaml up -d orderer.example.com
+  # Stopping Peers and Copying Ledger
+  for peer in peer0.org1.example.com peer1.org1.example.com peer0.org2.example.com peer1.org2.example.com
+  do
+    docker stop $peer
+    docker cp $peer:/var/hyperledger/production ./$peer/
+    IMAGE_TAG=$IMAGETAG docker-compose -f docker-compose-backup.yaml up -d $peer
+  done
+  ##Cleanup the chaincode containers
+  docker rm -f dev-peer1.org2.example.com-mycc-1.0 dev-peer0.org1.example.com-mycc-1.0 dev-peer0.org2.example.com-mycc-1.0
+  ##Cleanup images
+  removeUnwantedImages
+  docker exec cli scripts/testupgrade.sh $CHANNEL_NAME $CLI_DELAY $LANGUAGE $CLI_TIMEOUT
+  if [ $? -ne 0 ]; then
+    echo "ERROR !!!! Test failed"
+    exit 1
+  fi
+}
+
 
 # Tear down running network
 function networkDown () {
@@ -313,7 +342,7 @@ function generateChannelArtifacts() {
 OS_ARCH=$(echo "$(uname -s|tr '[:upper:]' '[:lower:]'|sed 's/mingw64_nt.*/windows/')-$(uname -m | sed 's/x86_64/amd64/g')" | awk '{print tolower($0)}')
 # timeout duration - the duration the CLI should wait for a response from
 # another container before giving up
-CLI_TIMEOUT=10
+CLI_TIMEOUT=120
 # default for delay between commands
 CLI_DELAY=3
 # channel name defaults to "mychannel"
@@ -340,6 +369,8 @@ elif [ "$MODE" == "restart" ]; then
   EXPMODE="Restarting"
 elif [ "$MODE" == "generate" ]; then
   EXPMODE="Generating certs and genesis block for"
+elif [ "$MODE" == "upgrade" ]; then
+  EXPMODE="Upgrading the network"
 else
   printHelp
   exit 1
@@ -391,6 +422,8 @@ elif [ "${MODE}" == "generate" ]; then ## Generate Artifacts
 elif [ "${MODE}" == "restart" ]; then ## Restart the network
   networkDown
   networkUp
+elif [ "${MODE}" == "upgrade" ]; then ## Upgrade the network from v1.0.x to v1.1
+  upgradeNetwork
 else
   printHelp
   exit 1
