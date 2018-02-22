@@ -1,0 +1,61 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+version: '2'
+
+networks:
+  byfn:
+
+services:
+
+  orderer.example.com:
+    extends:
+      file: docker-compose-cli.yaml
+      service: orderer.example.com
+    container_name: orderer.example.com
+    volumes:
+      - ./orderer.example.com:/var/hyperledger/production/orderer
+    networks:
+      - byfn
+
+  peer0.org1.example.com:
+    container_name: peer0.org1.example.com
+    extends:
+      file: docker-compose-cli.yaml
+      service: peer0.org1.example.com
+    volumes:
+      - ./peer0.org1.example.com:/var/hyperledger/production
+    networks:
+      - byfn
+
+  peer1.org1.example.com:
+    container_name: peer1.org1.example.com
+    extends:
+      file: docker-compose-cli.yaml
+      service: peer1.org1.example.com
+    volumes:
+      - ./peer1.org1.example.com:/var/hyperledger/production
+    networks:
+      - byfn
+
+  peer0.org2.example.com:
+    container_name: peer0.org2.example.com
+    extends:
+      file: docker-compose-cli.yaml
+      service: peer0.org2.example.com
+    volumes:
+      - ./peer0.org2.example.com:/var/hyperledger/production
+    networks:
+      - byfn
+
+  peer1.org2.example.com:
+    container_name: peer1.org2.example.com
+    extends:
+      file: docker-compose-cli.yaml
+      service: peer1.org2.example.com
+    volumes:
+      - ./peer1.org2.example.com:/var/hyperledger/production
+    networks:
+      - byfn
