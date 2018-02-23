@@ -50,13 +50,32 @@ var instantiateChaincode = async function(peers, channelName, chaincodeName, cha
 			chaincodeType: chaincodeType,
 			chaincodeVersion: chaincodeVersion,
 			args: args,
-			txId: tx_id
-		};
+			txId: tx_id,
+
+		// use this to demonstrate the following policy:
+		// 'if signed by org1 admin, then that's the only signature required,
+		// but if that signature is missing, then the policy can also be fulfilled
+		// when members (non-admin) from both orgs signed'
+		'endorsement-policy': {
+				identities:
+				[
+					{ role: { name: 'member', mspId: 'Org1MSP' }},
+					{ role: { name: 'member', mspId: 'Org2MSP' }}
+				],
+			policy: {
+				'2-of': [	
+					{ 'signed-by': 0},
+					{ 'signed-by': 1}
+				]
+			}
+		}
+
+};
 
 		if (functionName)
 			request.fcn = functionName;
 
-		let results = await channel.sendInstantiateProposal(request, 60000); //instantiate takes much longer
+		let results = await channel.sendInstantiateProposal(request, 80000); //instantiate takes much longer
 
 		// the returned object has both the endorsement results
 		// and the actual proposal, the proposal will be needed
