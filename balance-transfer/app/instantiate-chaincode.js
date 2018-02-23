@@ -50,13 +50,30 @@ var instantiateChaincode = async function(peers, channelName, chaincodeName, cha
 			chaincodeType: chaincodeType,
 			chaincodeVersion: chaincodeVersion,
 			args: args,
-			txId: tx_id
-		};
+			txId: tx_id,
+
+		// use this to demonstrate the following policy:
+		// 'the policy can be fulfilled when members from both orgs signed'
+		'endorsement-policy': {
+				identities:
+				[
+					{ role: { name: 'member', mspId: 'Org1MSP' }},
+					{ role: { name: 'member', mspId: 'Org2MSP' }}
+				],
+			policy: {
+				'2-of':[
+					{ 'signed-by': 0},
+					{ 'signed-by': 1}
+				]
+			}
+		}
+
+};
 
 		if (functionName)
 			request.fcn = functionName;
 
-		let results = await channel.sendInstantiateProposal(request, 60000); //instantiate takes much longer
+		let results = await channel.sendInstantiateProposal(request, 80000); //instantiate takes much longer
 
 		// the returned object has both the endorsement results
 		// and the actual proposal, the proposal will be needed
