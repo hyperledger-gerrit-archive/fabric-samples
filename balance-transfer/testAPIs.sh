@@ -166,7 +166,7 @@ TRX_ID=$(curl -s -X POST \
   -H "authorization: Bearer $ORG1_TOKEN" \
   -H "content-type: application/json" \
   -d '{
-	"peers": ["peer0.org1.example.com","peer1.org1.example.com"],
+	"peers": ["peer0.org1.example.com","peer0.org2.example.com"],
 	"fcn":"move",
 	"args":["a","b","10"]
 }')
