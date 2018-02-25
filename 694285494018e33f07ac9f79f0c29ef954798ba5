@@ -1,0 +1,8 @@
+Code-Review+2: Yacov Manevich <yacovm@il.ibm.com>
+Verified+1: Hyperledger Jobbuilder <jobbuilder@jenkins.hyperledger.org>
+Code-Review+2: David Enyeart <enyeart@us.ibm.com>
+Submitted-by: David Enyeart <enyeart@us.ibm.com>
+Submitted-at: Sun, 25 Feb 2018 14:10:04 +0000
+Reviewed-on: https://gerrit.hyperledger.org/r/18377
+Project: fabric-samples
+Branch: refs/heads/release
