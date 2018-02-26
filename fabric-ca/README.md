@@ -16,20 +16,47 @@ The Hyperledger Fabric CA sample demonstrates the following:
 
 ## Running this sample
 
-1. The following images are required to run this sample:
-*hyperledger/fabric-ca-orderer*, *hyperledger/fabric-ca-peer*, and *hyperledger/fabric-ca-tools*.
-These images are new in the v1.1.0 release of the *github.com/hyperledger/fabric-ca*.
-In order to run this sample prior to the v1.1.0 release, you must build these
-images manually as follows:
-a) pull the master branch of the *github.com/hyperledger/fabric* and
-   *github.com/hyperledger/fabric-ca* repositories;
-b) make sure these repositories are on your GOPATH;
-c) run the *build-images.sh* script provided with this sample.
+1. Clone Fabric from https://github.com/hyperledger/fabric
 
-2. To run this sample, simply run the *start.sh* script.  You may do this multiple times in a row as needed
+2. The following images are required to run this sample:
+*hyperledger/fabric-ca-orderer*, *hyperledger/fabric-ca-peer*, and *hyperledger/fabric-ca-tools*
+
+    #### 1.1.0
+    Before running this sample, make sure you have gone through the bootstrapping step of downloading
+    platform-specific fabric images. Refer to the docs found [here](https://hyperledger-fabric.readthedocs.io/en/v1.1.0-release/samples.html#download-platform-specific-binaries)
+
+    These images are platform dependent, to see all the supported platforms, go to the following links
+    to find the appropriate tag:
+
+    https://hub.docker.com/r/hyperledger/fabric-ca-orderer/tags/
+    https://hub.docker.com/r/hyperledger/fabric-ca-peer/tags/
+    https://hub.docker.com/r/hyperledger/fabric-ca-tools/tags/
+
+    Use 'docker pull' to download these images, for example the commands to download images for x86 architecture are:
+
+    `docker pull hyperledger/fabric-ca-orderer:x86_64-1.1.0`
+    `docker pull hyperledger/fabric-ca-peer:x86_64-1.1.0`
+    `docker pull hyperledger/fabric-ca-tools:x86_64-1.1.0`
+
+    Run the following commands to remove the tag:
+
+    `docker tag hyperledger/fabric-ca-orderer:x86_64-1.1.0 hyperledger/fabric-ca-orderer`
+    `docker tag hyperledger/fabric-ca-peer:x86_64-1.1.0 hyperledger/fabric-ca-peer`
+    `docker tag hyperledger/fabric-ca-tools:x86_64-1.1.0 hyperledger/fabric-ca-tools`
+
+    #### 1.0.X
+    These images are new in the v1.1.0 release of the *github.com/hyperledger/fabric-ca*.
+    In order to run this sample prior to the v1.1.0 release, you must build these
+    images manually as follows:
+    a) pull the master branch of the *github.com/hyperledger/fabric* and
+       *github.com/hyperledger/fabric-ca* repositories;
+    b) make sure these repositories are on your GOPATH;
+    c) run the *build-images.sh* script provided with this sample.
+
+3. To run this sample, simply run the *start.sh* script.  You may do this multiple times in a row as needed
 since the *start.sh* script cleans up before starting each time.
 
-3. To stop the containers which are started by the *start.sh* script, you may run the *stop.sh* script.
+4. To stop the containers which are started by the *start.sh* script, you may run the *stop.sh* script.
 
 ## Understanding this sample
 
