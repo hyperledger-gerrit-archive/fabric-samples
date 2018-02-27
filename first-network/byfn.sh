@@ -105,8 +105,44 @@ function removeUnwantedImages() {
   fi
 }
 
+# Versions of fabric known not to work with this release of first-network
+BLACKLISTED_VERSIONS="^1\.0\. ^1\.1\.0-preview ^1\.1\.0-alpha"
+
+# Do some basic sanity checking to make sure that the appropriate versions of fabric
+# binaries/images are available.  In the future, additional checking for the presence
+# of go or other items could be added.
+function checkPrereqs() {
+  LOCAL_VERSION=$(configtxlator version | sed -ne 's/ Version: //p')
+  DOCKER_VERSION=$(docker run --rm hyperledger/fabric-tools:latest peer version | sed -ne 's/ Version: //p'|head -1)
+
+  echo "LOCAL_VERSION=$LOCAL_VERSION"
+  echo "DOCKER_IMAGE_VERSION=$DOCKER_VERSION"
+
+  if [ "$LOCAL_VERSION" != "$DOCKER_VERSION" ] ; then
+     echo "=================== WARNING ==================="
+     echo "  Local binaries and docker images are out of  "
+     echo "  sync. This may cause problems.               "
+     echo "==============================================="
+  fi
+
+  for UNSUPPORTED_VERSION in $BLACKLISTED_VERSIONS ; do
+     echo "$LOCAL_VERSION" | grep -q $UNSUPPORTED_VERSION
+     if [ $? -eq 0 ] ; then
+       echo "ERROR! Local binary version of $LOCAL_VERSION is unsupported."
+       exit 1
+     fi
+
+     echo "$DOCKER_VERSION" | grep -q $UNSUPPORTED_VERSION
+     if [ $? -eq 0 ] ; then
+       echo "ERROR! Docker image binary version of $DOCKER_VERSION is unsupported."
+       exit 1
+     fi
+  done
+}
+
 # Generate the needed certificates, the genesis block and start the network.
 function networkUp () {
+  checkPrereqs
   # generate artifacts if they don't exist
   if [ ! -d "crypto-config" ]; then
     generateCerts
