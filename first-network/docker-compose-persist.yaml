@@ -5,6 +5,14 @@
 
 version: '2'
 
+volumes:
+  orderer.example.com:
+  peer0.org1.example.com:
+  peer1.org1.example.com:
+  peer0.org2.example.com:
+  peer1.org2.example.com:
+
+
 networks:
   byfn:
 
@@ -12,20 +20,20 @@ services:
 
   orderer.example.com:
     volumes:
-      - ./ledgers/orderer.example.com:/var/hyperledger/production/orderer
+      - orderer.example.com:/var/hyperledger/production/orderer
 
   peer0.org1.example.com:
     volumes:
-      - ./ledgers/peer0.org1.example.com:/var/hyperledger/production
+      - peer0.org1.example.com:/var/hyperledger/production
 
   peer1.org1.example.com:
     volumes:
-      - ./ledgers/peer1.org1.example.com:/var/hyperledger/production
+      - peer1.org1.example.com:/var/hyperledger/production
 
   peer0.org2.example.com:
     volumes:
-      - ./ledgers/peer0.org2.example.com:/var/hyperledger/production
+      - peer0.org2.example.com:/var/hyperledger/production
 
   peer1.org2.example.com:
     volumes:
-      - ./ledgers/peer1.org2.example.com:/var/hyperledger/production
+      - peer1.org2.example.com:/var/hyperledger/production
