@@ -114,8 +114,6 @@ function networkUp () {
     generateChannelArtifacts
   fi
   if $PERSIST ; then
-      echo "Persisting ledgers to ./ledgers/"
-      mkdir -p ./ledgers/
       if [ "${IF_COUCHDB}" == "couchdb" ]; then
           IMAGE_TAG=$IMAGETAG CHANNEL_NAME=$CHANNEL_NAME TIMEOUT=$CLI_TIMEOUT DELAY=$CLI_DELAY docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_PERSIST -f $COMPOSE_FILE_COUCH up -d 2>&1
       else
@@ -138,12 +136,15 @@ function networkUp () {
 
 # Tear down running network
 function networkDown () {
-  docker-compose -f $COMPOSE_FILE down
-  docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_COUCH down
+  if $PERSIST ; then
+    docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_PERSIST down
+    docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_PERSIST -f $COMPOSE_FILE_COUCH down
+  else
+    docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_PERSIST down --volumes
+    docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_PERSIST -f $COMPOSE_FILE_COUCH down --volumes
+  fi
   # Don't remove containers, images, etc if restarting
   if [ "$MODE" != "restart" ]; then
-    #Delete any persisted ledgers
-    docker run -v $PWD:/tmp/first-network --rm hyperledger/fabric-tools:$IMAGETAG rm -Rf /tmp/first-network/ledgers
     #Cleanup the chaincode containers
     clearContainers
     #Cleanup images
