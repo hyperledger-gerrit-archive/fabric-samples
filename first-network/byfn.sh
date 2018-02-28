@@ -154,20 +154,10 @@ function networkUp () {
     replacePrivateKey
     generateChannelArtifacts
   fi
-  if $PERSIST ; then
-      echo "Persisting ledgers to ./ledgers/"
-      mkdir -p ./ledgers/
-      if [ "${IF_COUCHDB}" == "couchdb" ]; then
-          IMAGE_TAG=$IMAGETAG docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_PERSIST -f $COMPOSE_FILE_COUCH up -d 2>&1
-      else
-          IMAGE_TAG=$IMAGETAG docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_PERSIST up -d 2>&1
-      fi
-   else
-      if [ "${IF_COUCHDB}" == "couchdb" ]; then
-          IMAGE_TAG=$IMAGETAG docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_COUCH up -d 2>&1
-      else
-          IMAGE_TAG=$IMAGETAG docker-compose -f $COMPOSE_FILE up -d 2>&1
-      fi
+  if [ "${IF_COUCHDB}" == "couchdb" ]; then
+    IMAGE_TAG=$IMAGETAG docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_COUCH up -d 2>&1
+  else
+    IMAGE_TAG=$IMAGETAG docker-compose -f $COMPOSE_FILE up -d 2>&1
   fi
   if [ $? -ne 0 ]; then
     echo "ERROR !!!! Unable to start network"
@@ -197,9 +187,9 @@ function upgradeNetwork () {
 
   export IMAGE_TAG=$IMAGETAG
   if [ "${IF_COUCHDB}" == "couchdb" ]; then
-      COMPOSE_FILES="-f $COMPOSE_FILE -f $COMPOSE_FILE_PERSIST -f $COMPOSE_FILE_COUCH"
+      COMPOSE_FILES="-f $COMPOSE_FILE -f $COMPOSE_FILE_COUCH"
   else
-      COMPOSE_FILES="-f $COMPOSE_FILE -f $COMPOSE_FILE_PERSIST"
+      COMPOSE_FILES="-f $COMPOSE_FILE"
   fi
 
   # removing the cli container
@@ -242,12 +232,11 @@ function upgradeNetwork () {
 
 # Tear down running network
 function networkDown () {
-  docker-compose -f $COMPOSE_FILE down
-  docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_COUCH down
+  docker-compose -f $COMPOSE_FILE down --volumes
+  docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_COUCH down --volumes
   # Don't remove containers, images, etc if restarting
   if [ "$MODE" != "restart" ]; then
-    #Delete any persisted ledgers
-    docker run -v $PWD:/tmp/first-network --rm hyperledger/fabric-tools:$IMAGETAG rm -Rf /tmp/first-network/ledgers
+    #Delete any ledger backups
     docker run -v $PWD:/tmp/first-network --rm hyperledger/fabric-tools:$IMAGETAG rm -Rf /tmp/first-network/ledgers-backup
     #Cleanup the chaincode containers
     clearContainers
@@ -439,9 +428,6 @@ COMPOSE_FILE_COUCH=docker-compose-couch.yaml
 LANGUAGE=golang
 # default image tag
 IMAGETAG="latest"
-# By default, to not use volume mounts for the ledgers
-PERSIST="false"
-COMPOSE_FILE_PERSIST=docker-compose-persist.yaml
 # Parse commandline args
 if [ "$1" = "-m" ];then	# supports old usage, muscle memory is powerful!
     shift
@@ -463,7 +449,7 @@ else
   exit 1
 fi
 
-while getopts "h?m:c:t:d:f:s:l:i:p" opt; do
+while getopts "h?m:c:t:d:f:s:l:i:" opt; do
   case "$opt" in
     h|\?)
       printHelp
@@ -482,8 +468,6 @@ while getopts "h?m:c:t:d:f:s:l:i:p" opt; do
     l)  LANGUAGE=$OPTARG
     ;;
     i)  IMAGETAG=`uname -m`"-"$OPTARG
-    ;;
-    p)  PERSIST=true
     ;;
   esac
 done
