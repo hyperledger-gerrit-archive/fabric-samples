@@ -1,0 +1,11 @@
+Verified+1: Hyperledger Jobbuilder <jobbuilder@jenkins.hyperledger.org>
+Code-Review+2: Gari Singh <gari.r.singh@gmail.com>
+Code-Review+1: Luis Sanchez <sanchezl@us.ibm.com>
+Code-Review+1: Arnaud J Le Hors <lehors@us.ibm.com>
+Code-Review+1: Christopher Ferris <chris.ferris@gmail.com>
+Code-Review+2: David Enyeart <enyeart@us.ibm.com>
+Submitted-by: David Enyeart <enyeart@us.ibm.com>
+Submitted-at: Thu, 01 Mar 2018 01:36:30 +0000
+Reviewed-on: https://gerrit.hyperledger.org/r/18535
+Project: fabric-samples
+Branch: refs/heads/release
