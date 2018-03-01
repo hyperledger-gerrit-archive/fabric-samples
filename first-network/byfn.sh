@@ -230,7 +230,7 @@ function upgradeNetwork () {
 }
 
 
-# Tear down running network
+# Tear down running network no-op
 function networkDown () {
   docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_COUCH down --volumes
   docker-compose -f $COMPOSE_FILE down --volumes
