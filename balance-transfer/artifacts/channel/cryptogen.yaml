@@ -37,6 +37,8 @@ PeerOrgs:
     # ---------------------------------------------------------------------------
     CA:
        Hostname: ca # implicitly ca.org1.example.com
+       SANS:
+         - "localhost"
 
     # ---------------------------------------------------------------------------
     # "Specs"
@@ -104,6 +106,8 @@ PeerOrgs:
     Domain: org2.example.com
     CA:
        Hostname: ca # implicitly ca.org1.example.com
+       SANS:
+         - "localhost"
 
     Template:
       Count: 2
