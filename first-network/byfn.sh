@@ -87,7 +87,7 @@ function askProceed () {
 # Obtain CONTAINER_IDS and remove them
 # TODO Might want to make this optional - could clear other containers
 function clearContainers () {
-  CONTAINER_IDS=$(docker ps -aq)
+  CONTAINER_IDS=$(docker ps -a | awk '"/hyperledger/" {print $1}'| grep -v "CONTAINER")
   if [ -z "$CONTAINER_IDS" -o "$CONTAINER_IDS" == " " ]; then
     echo "---- No containers available for deletion ----"
   else
