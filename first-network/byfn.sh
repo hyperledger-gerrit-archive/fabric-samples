@@ -445,11 +445,9 @@ LANGUAGE=golang
 # default image tag
 IMAGETAG="latest"
 # Parse commandline args
-if [ "$1" = "-m" ];then	# supports old usage, muscle memory is powerful!
-    shift
-fi
+
 MODE=$1;shift
-# Determine whether starting, stopping, restarting or generating for announce
+# Determine whether starting, stopping, restarting, generating or updating
 if [ "$MODE" == "up" ]; then
   EXPMODE="Starting"
 elif [ "$MODE" == "down" ]; then
@@ -465,7 +463,7 @@ else
   exit 1
 fi
 
-while getopts "h?m:c:t:d:f:s:l:i:" opt; do
+while getopts "h?c:t:d:f:s:l:i:" opt; do
   case "$opt" in
     h|\?)
       printHelp
