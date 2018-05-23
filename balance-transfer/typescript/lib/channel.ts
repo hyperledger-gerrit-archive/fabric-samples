@@ -18,6 +18,8 @@ import * as util from 'util';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as helper from './helper';
+import { EventHub, Peer, ProposalResponse, ChaincodeInvokeRequest, ChaincodeQueryRequest, ChannelInfo } from 'fabric-client';
+
 const logger = helper.getLogger('ChannelApi');
 // tslint:disable-next-line:no-var-requires
 const config = require('../app_config.json');
@@ -216,7 +218,7 @@ export async function instantiateChainCode(
 
         let allGood = true;
 
-        proposalResponses.forEach((pr) => {
+        proposalResponses.forEach((pr: ProposalResponse) => {
             let oneGood = false;
             if (pr.response && pr.response.status === 200) {
                 oneGood = true;
@@ -262,7 +264,7 @@ export async function instantiateChainCode(
                     reject();
                 }, 30000);
 
-                eh.registerTxEvent(deployId, (tx, code) => {
+                eh.registerTxEvent(deployId, (tx: string, code: string) => {
                     // logger.info(
                     //  'The chaincode instantiate transaction has been committed on peer ' +
                     // eh._ep._endpoint.addr);
@@ -346,7 +348,7 @@ export async function invokeChaincode(
         const proposal = results[1];
         let allGood = true;
 
-        proposalResponses.forEach((pr) => {
+        proposalResponses.forEach((pr: ProposalResponse) => {
             let oneGood = false;
             if (pr.response && pr.response.status === 200) {
                 oneGood = true;
@@ -377,7 +379,7 @@ export async function invokeChaincode(
             const eventPromises: Array<Promise<any>> = [];
 
             if (!peerNames) {
-                peerNames = channel.getPeers().map((peer) => {
+                peerNames = channel.getPeers().map((peer: Peer) => {
                     return peer.getName();
                 });
             }
@@ -452,11 +454,9 @@ export async function queryChaincode(
 
     const user = await helper.getRegisteredUsers(username, org);
 
-    const txId = client.newTransactionID();
     // send query
     const request: ChaincodeQueryRequest = {
         chaincodeId: chaincodeName,
-        txId,
         fcn,
         args
     };
@@ -470,7 +470,7 @@ export async function queryChaincode(
 
         if (responsePayloads) {
 
-            responsePayloads.forEach((rp) => {
+            responsePayloads.forEach((rp: Buffer) => {
                 logger.info(args[0] + ' now has ' + rp.toString('utf8') +
                     ' after the move');
                 return args[0] + ' now has ' + rp.toString('utf8') +
@@ -501,7 +501,7 @@ export async function getBlockByNumber(
         const responsePayloads = await channel.queryBlock(parseInt(blockNumber, 10), target);
 
         if (responsePayloads) {
-            logger.debug(responsePayloads);
+            logger.debug(responsePayloads.toString());
             return responsePayloads; // response_payloads.data.data[0].buffer;
         } else {
             logger.error('response_payloads is null');
@@ -554,7 +554,7 @@ export async function getChainInfo(peer: string, username: string, org: string) 
         if (blockChainInfo) {
             // FIXME: Save this for testing 'getBlockByHash'  ?
             logger.debug('===========================================');
-            logger.debug(blockChainInfo.currentBlockHash);
+            logger.debug(blockChainInfo.currentBlockHash.toString());
             logger.debug('===========================================');
             // logger.debug(blockchainInfo);
             return blockChainInfo;
@@ -583,7 +583,7 @@ export async function getChannels(peer: string, username: string, org: string) {
         if (response) {
             logger.debug('<<< channels >>>');
             const channelNames: string[] = [];
-            response.channels.forEach((ci) => {
+            response.channels.forEach((ci: ChannelInfo) => {
                 channelNames.push('channel id: ' + ci.channel_id);
             });
             return response;
