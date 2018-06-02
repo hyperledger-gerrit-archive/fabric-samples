@@ -99,8 +99,12 @@ function networkUp () {
   # start org3 peers
   if [ "${IF_COUCHDB}" == "couchdb" ]; then
       IMAGE_TAG=${IMAGETAG} docker-compose -f $COMPOSE_FILE_ORG3 -f $COMPOSE_FILE_COUCH_ORG3 up -d 2>&1
+      echo "--------> List Docker Containers"
+      sleep 10 && docker ps -a && echo
   else
       IMAGE_TAG=$IMAGETAG docker-compose -f $COMPOSE_FILE_ORG3 up -d 2>&1
+      echo "--------> List Docker Containers"
+      sleep 10 && docker ps -a && echo
   fi
   if [ $? -ne 0 ]; then
     echo "ERROR !!!! Unable to start Org3 network"
