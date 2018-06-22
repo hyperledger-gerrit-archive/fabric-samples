@@ -1,0 +1,8 @@
+Verified+1: Hyperledger Jobbuilder <jobbuilder@jenkins.hyperledger.org>
+Code-Review+2: Jason Yellick <jyellick@us.ibm.com>
+Code-Review+2: David Enyeart <enyeart@us.ibm.com>
+Submitted-by: David Enyeart <enyeart@us.ibm.com>
+Submitted-at: Fri, 22 Jun 2018 12:50:50 +0000
+Reviewed-on: https://gerrit.hyperledger.org/r/23467
+Project: fabric-samples
+Branch: refs/heads/master
