@@ -6,7 +6,7 @@
 #
 
 # current version of fabric-ca released
-export CA_VERSION=${1:-1.1.0}
+export CA_VERSION=${1:-1.2.0}
 export ARCH=$(echo "$(uname -s|tr '[:upper:]' '[:lower:]'|sed 's/mingw64_nt.*/windows/')-$(uname -m | sed 's/x86_64/amd64/g')" | awk '{print tolower($0)}')
 #Set MARCH variable i.e ppc64le,s390x,x86_64,i386
 MARCH=`uname -m`

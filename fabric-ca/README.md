@@ -19,9 +19,11 @@ The Hyperledger Fabric CA sample demonstrates the following:
 1. The following images are required to run this sample:
 *hyperledger/fabric-ca-orderer*, *hyperledger/fabric-ca-peer*, and *hyperledger/fabric-ca-tools*
 
-    #### 1.1.0
+    #### 1.1.0 (or later)
     Run the *bootstrap.sh* script provided with this sample to download the required images for
-    fabric-ca sample.
+    fabric-ca sample.  By default, the latest release is assumed, but you can set the *CA_VERSION*
+    environment variable to a specific release to override this default.  For example,
+    *CA_VERSION=1.1.0 bootstrap.sh* downloads the images for version 1.1.0.
 
     #### 1.0.X
     These images are new in the v1.1.0 release of the *github.com/hyperledger/fabric-ca*.
