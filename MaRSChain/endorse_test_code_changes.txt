@@ -1,0 +1,90 @@
+diff --git a/balance-transfer/app.js b/balance-transfer/app.js
+index 7b62b84..8e9033b 100644
+--- a/balance-transfer/app.js
++++ b/balance-transfer/app.js
+@@ -215,6 +215,7 @@ app.post('/chaincodes', async function(req, res) {
+ // Instantiate chaincode on target peers
+ app.post('/channels/:channelName/chaincodes', async function(req, res) {
+ 	logger.debug('==================== INSTANTIATE CHAINCODE ==================');
++	var peers = req.body.peers;
+ 	var chaincodeName = req.body.chaincodeName;
+ 	var chaincodeVersion = req.body.chaincodeVersion;
+ 	var channelName = req.params.channelName;
+@@ -227,6 +228,18 @@ app.post('/channels/:channelName/chaincodes', async function(req, res) {
+ 	logger.debug('chaincodeType  : ' + chaincodeType);
+ 	logger.debug('fcn  : ' + fcn);
+ 	logger.debug('args  : ' + args);
++
++	//endorsement policy
++	var epolicy = {
++        identities: [
++        	{ role: { name: "member", mspId: "Org1MSP" }},
++	        { role: { name: "member", mspId: "Org2MSP" }}
++        ],
++        policy: {
++    	    "2-of": [{ "signed-by": 0 }, { "signed-by": 1 }]
++        }
++    };
++
+ 	if (!chaincodeName) {
+ 		res.json(getErrorMessage('\'chaincodeName\''));
+ 		return;
+@@ -248,7 +261,7 @@ app.post('/channels/:channelName/chaincodes', async function(req, res) {
+ 		return;
+ 	}
+ 
+-	let message = await instantiate.instantiateChaincode(channelName, chaincodeName, chaincodeVersion, chaincodeType, fcn, args, req.username, req.orgname);
++	let message = await instantiate.instantiateChaincode(epolicy, peers, channelName, chaincodeName, chaincodeVersion, chaincodeType, fcn, args, req.username, req.orgname);
+ 	res.send(message);
+ });
+ // Invoke transaction on chaincode on target peers
+diff --git a/balance-transfer/app/instantiate-chaincode.js b/balance-transfer/app/instantiate-chaincode.js
+index fe529a6..13a1903 100644
+--- a/balance-transfer/app/instantiate-chaincode.js
++++ b/balance-transfer/app/instantiate-chaincode.js
+@@ -21,7 +21,7 @@ var hfc = require('fabric-client');
+ var helper = require('./helper.js');
+ var logger = helper.getLogger('instantiate-chaincode');
+ 
+-var instantiateChaincode = async function(channelName, chaincodeName, chaincodeVersion, functionName, chaincodeType, args, username, org_name) {
++var instantiateChaincode = async function(epolicy, peerNames, channelName, chaincodeName, chaincodeVersion, functionName, chaincodeType, args, username, org_name) {
+ 	logger.debug('\n\n============ Instantiate chaincode on channel ' + channelName +
+ 		' ============\n');
+ 	var error_message = null;
+@@ -49,8 +49,12 @@ var instantiateChaincode = async function(channelName, chaincodeName, chaincodeV
+ 			chaincodeType: chaincodeType,
+ 			chaincodeVersion: chaincodeVersion,
+ 			args: args,
+-			txId: tx_id
++			txId: tx_id,
++			"endorsement-policy": epolicy
+ 		};
++		
++		if (peerNames)
++			request.targets = peerNames;
+ 
+ 		if (functionName)
+ 			request.fcn = functionName;
+diff --git a/balance-transfer/app/invoke-transaction.js b/balance-transfer/app/invoke-transaction.js
+index b6b1341..5680e39 100644
+--- a/balance-transfer/app/invoke-transaction.js
++++ b/balance-transfer/app/invoke-transaction.js
+@@ -49,6 +49,9 @@ var invokeChaincode = async function(peerNames, channelName, chaincodeName, fcn,
+ 			txId: tx_id
+ 		};
+ 
++		if (peerNames)
++			request.targets = peerNames;
++
+ 		let results = await channel.sendTransactionProposal(request);
+ 
+ 		// the returned object has both the endorsement results
+@@ -99,7 +102,7 @@ var invokeChaincode = async function(peerNames, channelName, chaincodeName, fcn,
+ 						eh.unregisterTxEvent(tx_id_string);
+ 
+ 						if (code !== 'VALID') {
+-							let message = until.format('The invoke chaincode transaction was invalid, code:%s',code);
++							let message = util.format('The invoke chaincode transaction was invalid, code:%s',code);
+ 							logger.error(message);
+ 							reject(new Error(message));
+ 						} else {

@@ -1,0 +1,246 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+---
+################################################################################
+#
+#   Profile
+#
+#   - Different configuration profiles may be encoded here to be specified
+#   as parameters to the configtxgen tool
+#
+################################################################################
+Profiles:
+
+    MaRSChainOrdererGenesis:
+        Orderer:
+            <<: *OrdererDefaults
+            Organizations:
+                - *OrdererOrg
+        Consortiums:
+            MaRSChainConsortium:
+                Organizations:
+                    - *PC1
+                    - *PC2
+                    - *PC3
+                    - *PC4
+                    - *IEEE
+                    - *Springer
+                    - *Elsevier
+                    - *ACM
+
+    ConferenceOneChannel:
+        Consortium: MaRSChainConsortium
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *PC1
+                - *PC2
+                - *PC3
+                - *PC4
+
+    PhbcChannel:
+        Consortium: MaRSChainConsortium
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *IEEE
+                - *Springer
+                - *Elsevier
+                - *ACM
+
+################################################################################
+#
+#   Section: Organizations
+#
+#   - This section defines the different organizational identities which will
+#   be referenced later in the configuration.
+#
+################################################################################
+Organizations:
+
+    # SampleOrg defines an MSP using the sampleconfig.  It should never be used
+    # in production but may be used as a template for other definitions
+    - &OrdererOrg
+        # DefaultOrg defines the organization which is used in the sampleconfig
+        # of the fabric.git development environment
+        Name: OrdererMSP
+
+        # ID to load the MSP definition as
+        ID: OrdererMSP
+
+        # MSPDir is the filesystem path which contains the MSP configuration
+        MSPDir: crypto-config/ordererOrganizations/example.com/msp
+
+    - &PhbcOrdererOrg
+        # DefaultOrg defines the organization which is used in the sampleconfig
+        # of the fabric.git development environment
+        Name: PhbcOrdererMSP
+
+        # ID to load the MSP definition as
+        ID: PhbcOrdererMSP
+
+        # MSPDir is the filesystem path which contains the MSP configuration
+        MSPDir: crypto-config/ordererOrganizations/example.com/msp
+
+    - &PC1
+        # DefaultOrg defines the organization which is used in the sampleconfig
+        # of the fabric.git development environment
+        Name: PC1MSP
+
+        # ID to load the MSP definition as
+        ID: PC1MSP
+
+        MSPDir: crypto-config/peerOrganizations/pc1.example.com/msp
+
+        AnchorPeers:
+            # AnchorPeers defines the location of peers which can be used
+            # for cross org gossip communication.  Note, this value is only
+            # encoded in the genesis block in the Application section context
+            - Host: peer0.pc1.example.com
+              Port: 7051
+
+    - &PC2
+        # DefaultOrg defines the organization which is used in the sampleconfig
+        # of the fabric.git development environment
+        Name: PC2MSP
+
+        # ID to load the MSP definition as
+        ID: PC2MSP
+
+        MSPDir: crypto-config/peerOrganizations/pc2.example.com/msp
+
+        AnchorPeers:
+            # AnchorPeers defines the location of peers which can be used
+            # for cross org gossip communication.  Note, this value is only
+            # encoded in the genesis block in the Application section context
+            - Host: peer0.pc2.example.com
+              Port: 7051
+
+    - &PC3
+        Name: PC3MSP
+        ID: PC3MSP
+        MSPDir: crypto-config/peerOrganizations/pc3.example.com/msp
+        AnchorPeers:
+            - Host: peer0.pc3.example.com
+              Port: 7051
+
+    - &PC4
+        Name: PC4MSP
+        ID: PC4MSP
+        MSPDir: crypto-config/peerOrganizations/pc4.example.com/msp
+        AnchorPeers:
+            - Host: peer0.pc4.example.com
+              Port: 7051
+
+    - &IEEE
+        # DefaultOrg defines the organization which is used in the sampleconfig
+        # of the fabric.git development environment
+        Name: IEEEMSP
+
+        # ID to load the MSP definition as
+        ID: IEEEMSP
+
+        MSPDir: crypto-config/peerOrganizations/ieee.example.com/msp
+
+        AnchorPeers:
+            # AnchorPeers defines the location of peers which can be used
+            # for cross org gossip communication.  Note, this value is only
+            # encoded in the genesis block in the Application section context
+            - Host: peer0.ieee.example.com
+              Port: 7051
+
+    - &Springer
+        # DefaultOrg defines the organization which is used in the sampleconfig
+        # of the fabric.git development environment
+        Name: SpringerMSP
+
+        # ID to load the MSP definition as
+        ID: SpringerMSP
+
+        MSPDir: crypto-config/peerOrganizations/springer.example.com/msp
+
+        AnchorPeers:
+            # AnchorPeers defines the location of peers which can be used
+            # for cross org gossip communication.  Note, this value is only
+            # encoded in the genesis block in the Application section context
+            - Host: peer0.springer.example.com
+              Port: 7051
+
+    - &Elsevier
+        Name: ElsevierMSP
+        ID: ElsevierMSP
+        MSPDir: crypto-config/peerOrganizations/elsevier.example.com/msp
+        AnchorPeers:
+            - Host: peer0.elsevier.example.com
+              Port: 7051
+
+    - &ACM
+        Name: ACMMSP
+        ID: ACMMSP
+        MSPDir: crypto-config/peerOrganizations/acm.example.com/msp
+        AnchorPeers:
+            - Host: peer0.acm.example.com
+              Port: 7051
+
+
+################################################################################
+#
+#   SECTION: Orderer
+#
+#   - This section defines the values to encode into a config transaction or
+#   genesis block for orderer related parameters
+#
+################################################################################
+Orderer: &OrdererDefaults
+
+    # Orderer Type: The orderer implementation to start
+    # Available types are "solo" and "kafka"
+    OrdererType: solo
+
+    Addresses:
+        - orderer.example.com:7050
+
+    # Batch Timeout: The amount of time to wait before creating a batch
+    BatchTimeout: 2s
+
+    # Batch Size: Controls the number of messages batched into a block
+    BatchSize:
+
+        # Max Message Count: The maximum number of messages to permit in a batch
+        MaxMessageCount: 10
+
+        # Absolute Max Bytes: The absolute maximum number of bytes allowed for
+        # the serialized messages in a batch.
+        AbsoluteMaxBytes: 98 MB
+
+        # Preferred Max Bytes: The preferred maximum number of bytes allowed for
+        # the serialized messages in a batch. A message larger than the preferred
+        # max bytes will result in a batch larger than preferred max bytes.
+        PreferredMaxBytes: 512 KB
+
+    Kafka:
+        # Brokers: A list of Kafka brokers to which the orderer connects
+        # NOTE: Use IP:port notation
+        Brokers:
+            - 127.0.0.1:9092
+
+    # Organizations is the list of orgs which are defined as participants on
+    # the orderer side of the network
+    Organizations:
+
+################################################################################
+#
+#   SECTION: Application
+#
+#   - This section defines the values to encode into a config transaction or
+#   genesis block for application related parameters
+#
+################################################################################
+Application: &ApplicationDefaults
+
+    # Organizations is the list of orgs which are defined as participants on
+    # the application side of the network
+    Organizations:
