@@ -1,0 +1,530 @@
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+version: '2'
+
+services:
+
+  ca.pc1.example.com:
+    image: hyperledger/fabric-ca:x86_64-1.1.0-preview
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-pc1
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.pc1.example.com-cert.pem
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/2420941a31ae4d65d3167337f7f0366ce576a598816f658e4fe7862eac733fc3_sk
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.pc1.example.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/2420941a31ae4d65d3167337f7f0366ce576a598816f658e4fe7862eac733fc3_sk
+    ports:
+      - "7054:7054"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - ./channel/crypto-config/peerOrganizations/pc1.example.com/ca/:/etc/hyperledger/fabric-ca-server-config
+      - ./fabric-ca-server/fabric-ca-server-config.yaml:/etc/hyperledger/fabric-ca-server/fabric-ca-server-config.yaml
+    container_name: ca_peerPC1
+
+  ca.pc2.example.com:
+    image: hyperledger/fabric-ca:x86_64-1.1.0-preview
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-pc2
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.pc2.example.com-cert.pem
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/a5644d520708a9c9f69a826f8c8d60ac006be25baefb3082c7c5fe490d512725_sk
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.pc2.example.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/a5644d520708a9c9f69a826f8c8d60ac006be25baefb3082c7c5fe490d512725_sk
+    ports:
+      - "8054:7054"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - ./channel/crypto-config/peerOrganizations/pc2.example.com/ca/:/etc/hyperledger/fabric-ca-server-config
+      - ./fabric-ca-server/fabric-ca-server-config.yaml:/etc/hyperledger/fabric-ca-server/fabric-ca-server-config.yaml
+    container_name: ca_peerPC2
+
+  ca.pc3.example.com:
+    image: hyperledger/fabric-ca:x86_64-1.1.0-preview
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-pc3
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.pc3.example.com-cert.pem
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/fc2e61c8c0721c35a34a5c1b3bbe2ab244a36a6c57cd1a99110377d637b52844_sk
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.pc3.example.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/fc2e61c8c0721c35a34a5c1b3bbe2ab244a36a6c57cd1a99110377d637b52844_sk
+    ports:
+      - "9054:7054"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - ./channel/crypto-config/peerOrganizations/pc3.example.com/ca/:/etc/hyperledger/fabric-ca-server-config
+      - ./fabric-ca-server/fabric-ca-server-config.yaml:/etc/hyperledger/fabric-ca-server/fabric-ca-server-config.yaml
+    container_name: ca_peerPC3
+
+  ca.pc4.example.com:
+    image: hyperledger/fabric-ca:x86_64-1.1.0-preview
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-pc4
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.pc4.example.com-cert.pem
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/9fce6ca17f61227f8af3250ce7ec2f0a18e7ee7c3e738237fc034f9485a389dd_sk
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.pc4.example.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/9fce6ca17f61227f8af3250ce7ec2f0a18e7ee7c3e738237fc034f9485a389dd_sk
+    ports:
+      - "10054:7054"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - ./channel/crypto-config/peerOrganizations/pc4.example.com/ca/:/etc/hyperledger/fabric-ca-server-config
+      - ./fabric-ca-server/fabric-ca-server-config.yaml:/etc/hyperledger/fabric-ca-server/fabric-ca-server-config.yaml
+    container_name: ca_peerPC4
+
+  ca.ieee.example.com:
+    image: hyperledger/fabric-ca:x86_64-1.1.0-preview
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-ieee
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.ieee.example.com-cert.pem
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/5b7c17e02c49235aac843245236f1640f2a0438ef37169bb90cb2b4e3621e87f_sk
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.ieee.example.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/5b7c17e02c49235aac843245236f1640f2a0438ef37169bb90cb2b4e3621e87f_sk
+    ports:
+      - "11054:7054"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - ./channel/crypto-config/peerOrganizations/ieee.example.com/ca/:/etc/hyperledger/fabric-ca-server-config
+      - ./fabric-ca-server/fabric-ca-server-config.yaml:/etc/hyperledger/fabric-ca-server/fabric-ca-server-config.yaml
+    container_name: ca_peerieee
+
+  ca.springer.example.com:
+    image: hyperledger/fabric-ca:x86_64-1.1.0-preview
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-springer
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.springer.example.com-cert.pem
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/ca3dd37831464decec5e43e49ad4b68874e9d0373635df4487cb5507772c6dc0_sk
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.springer.example.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/ca3dd37831464decec5e43e49ad4b68874e9d0373635df4487cb5507772c6dc0_sk
+    ports:
+      - "12054:7054"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - ./channel/crypto-config/peerOrganizations/springer.example.com/ca/:/etc/hyperledger/fabric-ca-server-config
+      - ./fabric-ca-server/fabric-ca-server-config.yaml:/etc/hyperledger/fabric-ca-server/fabric-ca-server-config.yaml
+    container_name: ca_peerspringer
+
+  ca.elsevier.example.com:
+    image: hyperledger/fabric-ca:x86_64-1.1.0-preview
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-elsevier
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.elsevier.example.com-cert.pem
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/ea91a2480f64cc1bda58a7d585ba1065feccb5331c8915041f5c4e915126fcba_sk
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.elsevier.example.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/ea91a2480f64cc1bda58a7d585ba1065feccb5331c8915041f5c4e915126fcba_sk
+    ports:
+      - "13054:7054"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - ./channel/crypto-config/peerOrganizations/elsevier.example.com/ca/:/etc/hyperledger/fabric-ca-server-config
+      - ./fabric-ca-server/fabric-ca-server-config.yaml:/etc/hyperledger/fabric-ca-server/fabric-ca-server-config.yaml
+    container_name: ca_peerelsevier
+
+  ca.acm.example.com:
+    image: hyperledger/fabric-ca:x86_64-1.1.0-preview
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-acm
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.acm.example.com-cert.pem
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/9b381c7c9ef648cd37d802a7741475cec4f7c8eac33690a346858199ce944e99_sk
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.acm.example.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/9b381c7c9ef648cd37d802a7741475cec4f7c8eac33690a346858199ce944e99_sk
+    ports:
+      - "14054:7054"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - ./channel/crypto-config/peerOrganizations/acm.example.com/ca/:/etc/hyperledger/fabric-ca-server-config
+      - ./fabric-ca-server/fabric-ca-server-config.yaml:/etc/hyperledger/fabric-ca-server/fabric-ca-server-config.yaml
+    container_name: ca_peeracm
+
+
+  orderer.example.com:
+    container_name: orderer.example.com
+    image: hyperledger/fabric-orderer:x86_64-1.1.0-preview
+    environment:
+      - ORDERER_GENERAL_LOGLEVEL=debug
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      #- ORDERER_GENERAL_GENESISFILE=[/etc/hyperledger/configtx/cbconegenesis4orgs.block, /etc/hyperledger/configtx/phbcgenesis4orgs.block] 
+      - ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/configtx/marschainorderergenesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/crypto/orderer/msp
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      #- GRPC_TRACE=all=true
+      #- GRPC_VERBOSITY=debug
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/etc/hyperledger/crypto/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/etc/hyperledger/crypto/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/etc/hyperledger/crypto/orderer/tls/ca.crt, /etc/hyperledger/crypto/peerPC1/tls/ca.crt, /etc/hyperledger/crypto/peerPC2/tls/ca.crt, /etc/hyperledger/crypto/peerPC3/tls/ca.crt, /etc/hyperledger/crypto/peerPC4/tls/ca.crt, /etc/hyperledger/crypto/peerIEEE/tls/ca.crt, /etc/hyperledger/crypto/peerSpringer/tls/ca.crt, /etc/hyperledger/crypto/peerElsevier/tls/ca.crt, /etc/hyperledger/crypto/peerACM/tls/ca.crt]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderers
+    command: orderer
+    ports:
+      - 7050:7050
+    volumes:
+        - ./channel:/etc/hyperledger/configtx
+        - ./channel/crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/:/etc/hyperledger/crypto/orderer
+        - ./channel/crypto-config/peerOrganizations/pc1.example.com/peers/peer0.pc1.example.com/:/etc/hyperledger/crypto/peerPC1
+        - ./channel/crypto-config/peerOrganizations/pc2.example.com/peers/peer0.pc2.example.com/:/etc/hyperledger/crypto/peerPC2
+        - ./channel/crypto-config/peerOrganizations/pc3.example.com/peers/peer0.pc3.example.com/:/etc/hyperledger/crypto/peerPC3
+        - ./channel/crypto-config/peerOrganizations/pc4.example.com/peers/peer0.pc4.example.com/:/etc/hyperledger/crypto/peerPC4
+        - ./channel/crypto-config/peerOrganizations/ieee.example.com/peers/peer0.ieee.example.com/:/etc/hyperledger/crypto/peerIEEE
+        - ./channel/crypto-config/peerOrganizations/springer.example.com/peers/peer0.springer.example.com/:/etc/hyperledger/crypto/peerSpringer
+        - ./channel/crypto-config/peerOrganizations/elsevier.example.com/peers/peer0.elsevier.example.com/:/etc/hyperledger/crypto/peerElsevier
+        - ./channel/crypto-config/peerOrganizations/acm.example.com/peers/peer0.acm.example.com/:/etc/hyperledger/crypto/peerACM
+
+  peer0.pc1.example.com:
+    container_name: peer0.pc1.example.com
+    extends:
+      file:   base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.pc1.example.com
+      - CORE_PEER_LOCALMSPID=PC1MSP
+      - CORE_PEER_ADDRESS=peer0.pc1.example.com:7051
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb0:5984
+    ports:
+      - 7051:7051
+      - 7053:7053
+    volumes:
+        - ./channel/crypto-config/peerOrganizations/pc1.example.com/peers/peer0.pc1.example.com/:/etc/hyperledger/crypto/peer
+    depends_on:
+      - orderer.example.com
+      - couchdb0
+
+  peer1.pc1.example.com:
+    container_name: peer1.pc1.example.com
+    extends:
+      file:   base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer1.pc1.example.com
+      - CORE_PEER_LOCALMSPID=PC1MSP
+      - CORE_PEER_ADDRESS=peer1.pc1.example.com:7051
+    ports:
+      - 7056:7051
+      - 7058:7053
+    volumes:
+        - ./channel/crypto-config/peerOrganizations/pc1.example.com/peers/peer1.pc1.example.com/:/etc/hyperledger/crypto/peer
+    depends_on:
+      - orderer.example.com
+
+  peer0.pc2.example.com:
+    container_name: peer0.pc2.example.com
+    extends:
+      file:   base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.pc2.example.com
+      - CORE_PEER_LOCALMSPID=PC2MSP
+      - CORE_PEER_ADDRESS=peer0.pc2.example.com:7051
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb1:5984
+    ports:
+      - 8051:7051
+      - 8053:7053
+    volumes:
+        - ./channel/crypto-config/peerOrganizations/pc2.example.com/peers/peer0.pc2.example.com/:/etc/hyperledger/crypto/peer
+    depends_on:
+      - orderer.example.com
+      - couchdb1
+
+  peer1.pc2.example.com:
+    container_name: peer1.pc2.example.com
+    extends:
+      file:   base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer1.pc2.example.com
+      - CORE_PEER_LOCALMSPID=PC2MSP
+      - CORE_PEER_ADDRESS=peer1.pc2.example.com:7051
+    ports:
+      - 8056:7051
+      - 8058:7053
+    volumes:
+        - ./channel/crypto-config/peerOrganizations/pc2.example.com/peers/peer1.pc2.example.com/:/etc/hyperledger/crypto/peer
+    depends_on:
+      - orderer.example.com
+
+  peer0.pc3.example.com:
+    container_name: peer0.pc3.example.com
+    extends:
+      file:   base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.pc3.example.com
+      - CORE_PEER_LOCALMSPID=PC3MSP
+      - CORE_PEER_ADDRESS=peer0.pc3.example.com:7051
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb2:5984
+    ports:
+      - 9051:7051
+      - 9053:7053
+    volumes:
+        - ./channel/crypto-config/peerOrganizations/pc3.example.com/peers/peer0.pc3.example.com/:/etc/hyperledger/crypto/peer
+    depends_on:
+      - orderer.example.com
+      - couchdb2
+
+  peer1.pc3.example.com:
+    container_name: peer1.pc3.example.com
+    extends:
+      file:   base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer1.pc3.example.com
+      - CORE_PEER_LOCALMSPID=PC3MSP
+      - CORE_PEER_ADDRESS=peer1.pc3.example.com:7051
+    ports:
+      - 9056:7051
+      - 9058:7053
+    volumes:
+        - ./channel/crypto-config/peerOrganizations/pc3.example.com/peers/peer1.pc3.example.com/:/etc/hyperledger/crypto/peer
+    depends_on:
+      - orderer.example.com
+
+  peer0.pc4.example.com:
+    container_name: peer0.pc4.example.com
+    extends:
+      file:   base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.pc4.example.com
+      - CORE_PEER_LOCALMSPID=PC4MSP
+      - CORE_PEER_ADDRESS=peer0.pc4.example.com:7051
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb3:5984
+    ports:
+      - 10051:7051
+      - 10053:7053
+    volumes:
+        - ./channel/crypto-config/peerOrganizations/pc4.example.com/peers/peer0.pc4.example.com/:/etc/hyperledger/crypto/peer
+    depends_on:
+      - orderer.example.com
+      - couchdb3
+
+  peer1.pc4.example.com:
+    container_name: peer1.pc4.example.com
+    extends:
+      file:   base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer1.pc4.example.com
+      - CORE_PEER_LOCALMSPID=PC4MSP
+      - CORE_PEER_ADDRESS=peer1.pc4.example.com:7051
+    ports:
+      - 10056:7051
+      - 10058:7053
+    volumes:
+        - ./channel/crypto-config/peerOrganizations/pc4.example.com/peers/peer1.pc4.example.com/:/etc/hyperledger/crypto/peer
+    depends_on:
+      - orderer.example.com
+
+  peer0.ieee.example.com:
+    container_name: peer0.ieee.example.com
+    extends:
+      file:   base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.ieee.example.com
+      - CORE_PEER_LOCALMSPID=IEEEMSP
+      - CORE_PEER_ADDRESS=peer0.ieee.example.com:7051
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb4:5984
+    ports:
+      - 11051:7051
+      - 11053:7053
+    volumes:
+        - ./channel/crypto-config/peerOrganizations/ieee.example.com/peers/peer0.ieee.example.com/:/etc/hyperledger/crypto/peer
+    depends_on:
+      - orderer.example.com
+      - couchdb4
+
+  peer1.ieee.example.com:
+    container_name: peer1.ieee.example.com
+    extends:
+      file:   base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer1.ieee.example.com
+      - CORE_PEER_LOCALMSPID=IEEEMSP
+      - CORE_PEER_ADDRESS=peer1.ieee.example.com:7051
+    ports:
+      - 11056:7051
+      - 11058:7053
+    volumes:
+        - ./channel/crypto-config/peerOrganizations/ieee.example.com/peers/peer1.ieee.example.com/:/etc/hyperledger/crypto/peer
+    depends_on:
+      - orderer.example.com
+
+  peer0.springer.example.com:
+    container_name: peer0.springer.example.com
+    extends:
+      file:   base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.springer.example.com
+      - CORE_PEER_LOCALMSPID=SpringerMSP
+      - CORE_PEER_ADDRESS=peer0.springer.example.com:7051
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb5:5984
+    ports:
+      - 12051:7051
+      - 12053:7053
+    volumes:
+        - ./channel/crypto-config/peerOrganizations/springer.example.com/peers/peer0.springer.example.com/:/etc/hyperledger/crypto/peer
+    depends_on:
+      - orderer.example.com
+      - couchdb5
+
+  peer1.springer.example.com:
+    container_name: peer1.springer.example.com
+    extends:
+      file:   base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer1.springer.example.com
+      - CORE_PEER_LOCALMSPID=SpringerMSP
+      - CORE_PEER_ADDRESS=peer1.springer.example.com:7051
+    ports:
+      - 12056:7051
+      - 12058:7053
+    volumes:
+        - ./channel/crypto-config/peerOrganizations/springer.example.com/peers/peer1.springer.example.com/:/etc/hyperledger/crypto/peer
+    depends_on:
+      - orderer.example.com
+
+  peer0.elsevier.example.com:
+    container_name: peer0.elsevier.example.com
+    extends:
+      file:   base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.elsevier.example.com
+      - CORE_PEER_LOCALMSPID=ElsevierMSP
+      - CORE_PEER_ADDRESS=peer0.elsevier.example.com:7051
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb6:5984
+    ports:
+      - 13051:7051
+      - 13053:7053
+    volumes:
+        - ./channel/crypto-config/peerOrganizations/elsevier.example.com/peers/peer0.elsevier.example.com/:/etc/hyperledger/crypto/peer
+    depends_on:
+      - orderer.example.com
+      - couchdb6
+
+  peer1.elsevier.example.com:
+    container_name: peer1.elsevier.example.com
+    extends:
+      file:   base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer1.elsevier.example.com
+      - CORE_PEER_LOCALMSPID=ElsevierMSP
+      - CORE_PEER_ADDRESS=peer1.elsevier.example.com:7051
+    ports:
+      - 13056:7051
+      - 13058:7053
+    volumes:
+        - ./channel/crypto-config/peerOrganizations/elsevier.example.com/peers/peer1.elsevier.example.com/:/etc/hyperledger/crypto/peer
+    depends_on:
+      - orderer.example.com
+
+  peer0.acm.example.com:
+    container_name: peer0.acm.example.com
+    extends:
+      file:   base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.acm.example.com
+      - CORE_PEER_LOCALMSPID=ACMMSP
+      - CORE_PEER_ADDRESS=peer0.acm.example.com:7051
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb7:5984
+    ports:
+      - 14051:7051
+      - 14053:7053
+    volumes:
+        - ./channel/crypto-config/peerOrganizations/acm.example.com/peers/peer0.acm.example.com/:/etc/hyperledger/crypto/peer
+    depends_on:
+      - orderer.example.com
+      - couchdb7
+
+  peer1.acm.example.com:
+    container_name: peer1.acm.example.com
+    extends:
+      file:   base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer1.acm.example.com
+      - CORE_PEER_LOCALMSPID=ACMMSP
+      - CORE_PEER_ADDRESS=peer1.acm.example.com:7051
+    ports:
+      - 14056:7051
+      - 14058:7053
+    volumes:
+        - ./channel/crypto-config/peerOrganizations/acm.example.com/peers/peer1.acm.example.com/:/etc/hyperledger/crypto/peer
+    depends_on:
+      - orderer.example.com
+
+  couchdb0:
+    container_name: couchdb0
+    image: hyperledger/fabric-couchdb:x86_64-1.1.0-preview
+    ports:
+      - 5984:5984
+
+  couchdb1:
+    container_name: couchdb1
+    image: hyperledger/fabric-couchdb:x86_64-1.1.0-preview
+    ports:
+      - 6984:5984
+
+  couchdb2:
+    container_name: couchdb2
+    image: hyperledger/fabric-couchdb:x86_64-1.1.0-preview
+    ports:
+      - 7984:5984
+
+  couchdb3:
+    container_name: couchdb3
+    image: hyperledger/fabric-couchdb:x86_64-1.1.0-preview
+    ports:
+      - 8984:5984
+
+  couchdb4:
+    container_name: couchdb4
+    image: hyperledger/fabric-couchdb:x86_64-1.1.0-preview
+    ports:
+      - 9984:5984
+
+  couchdb5:
+    container_name: couchdb5
+    image: hyperledger/fabric-couchdb:x86_64-1.1.0-preview
+    ports:
+      - 10984:5984
+
+  couchdb6:
+    container_name: couchdb6
+    image: hyperledger/fabric-couchdb:x86_64-1.1.0-preview
+    ports:
+      - 11984:5984
+
+  couchdb7:
+    container_name: couchdb7
+    image: hyperledger/fabric-couchdb:x86_64-1.1.0-preview
+    ports:
+      - 12984:5984
