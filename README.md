@@ -9,7 +9,7 @@ intend to use to ensure alignment.
 
 ## Download Binaries and Docker Images
 
-The [`scripts/bootstrap.sh`](https://github.com/hyperledger/fabric-samples/blob/release-1.1/scripts/bootstrap.sh)
+The [`scripts/bootstrap.sh`](./scripts/bootstrap.sh)
 script will preload all of the requisite docker
 images for Hyperledger Fabric and tag them with the 'latest' tag. Optionally,
 specify a version for fabric, fabric-ca and thirdparty images. Default versions
