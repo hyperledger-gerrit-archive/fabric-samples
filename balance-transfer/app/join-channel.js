@@ -51,7 +51,7 @@ var joinChannel = async function(channel_name, peers, username, org_name) {
 		// that the channel has been created on each peer
 		var promises = [];
 		var block_registration_numbers = [];
-		let event_hubs = client.getEventHubsForOrg(org_name);
+		let event_hubs = channel.getChannelEventHubsForOrg(org_name);
 		event_hubs.forEach((eh) => {
 			let configBlockPromise = new Promise((resolve, reject) => {
 				let event_timeout = setTimeout(() => {
