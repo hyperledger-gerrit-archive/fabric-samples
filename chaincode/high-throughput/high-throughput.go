@@ -74,6 +74,8 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 		return s.putStandard(APIstub, args)
 	} else if function == "getstandard" {
 		return s.getStandard(APIstub, args)
+	} else if function == "delstandard" {
+		return s.delStandard(APIstub, args)
 	}
 
 	return shim.Error("Invalid Smart Contract function name.")
@@ -460,4 +462,15 @@ func (s *SmartContract) getStandard(APIstub shim.ChaincodeStubInterface, args []
 	}
 
 	return shim.Success(val)
+}
+
+func (s *SmartContract) delStandard(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+	name := args[0]
+
+	getErr := APIstub.DelState(name)
+	if getErr != nil {
+		return shim.Error(fmt.Sprintf("Failed to get state: %s", getErr.Error()))
+	}
+
+	return shim.Success([]byte(fmt.Sprintf("Deleted %s from the world state.", name)))
 }
