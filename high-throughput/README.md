@@ -1,9 +1,3 @@
-<!--
- Copyright IBM Corp All Rights Reserved
-
- SPDX-License-Identifier: Apache-2.0
--->
-
 # High-Throughput Network
 
 ## Purpose
@@ -101,24 +95,27 @@ and run some invocations are provided below.
 ### Build your network
 1. `cd` into the `first-network` folder within `fabric-samples`, e.g. `cd ~/fabric-samples/first-network`
 2. Open `docker-compose-cli.yaml` in your favorite editor, and edit the following lines:
-  * In the `volumes` section of the `cli` container, edit the second line which refers to the chaincode folder to point to the chaincode folder
-    within the `high-throughput` folder, e.g.
-
-    `./../chaincode/:/opt/gopath/src/github.com/hyperledger/fabric/examples/chaincode/go` --> 
-    `./../high-throughput/chaincode/:/opt/gopath/src/github.com/hyperledger/fabric/examples/chaincode/go`
-  * Again in the `volumes` section, edit the fourth line which refers to the scripts folder so it points to the scripts folder within the
+  
+  * In the `volumes` section, edit the fourth line which refers to the scripts folder so it points to the scripts folder within the
     `high-throughput` folder, e.g.
 
     `./scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/` --> 
     `./../high-throughput/scripts/:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/`
 
-  * Finally, comment out the `docker exec cli scripts/script.sh` command from the `byfn.sh` script by placing a `#` before it so that the standard BYFN end to end script doesn't run, e.g.
+  * In `byfn.sh` on line 169, comment out the docker cli command by placing a `#` before it, e.g.
+    
+    `#docker exec cli scripts/script.sh $CHANNEL_NAME $CLI_DELAY $LANGUAGE $CLI_TIMEOUT`
 
-    `#  docker exec cli scripts/script.sh $CHANNEL_NAME $CLI_DELAY $LANGUAGE $CLI_TIMEOUT $VERBOSE`
+3. Go back to the parent directory and navigate to `high-throughput/scripts`.  Open `install-chaincode.sh`
 
-3. We can now bring our network up by typing in `./byfn.sh -m up -c mychannel`
-4. Open a new terminal window and enter the CLI container using `docker exec -it cli bash`, all operations on the network will happen within
-   this container from now on.
+  * In all four `peer chaincode install` commands, replace the argument after `-p` with the following:
+
+    `github.com/hyperledger/fabric/examples/chaincode/go` --> `github.com/chaincode/high-throughput`
+
+4. We can now bring our network up by typing in `./byfn.sh up` (Channel name 'mychannel' will be established by default). Press 'Enter' when prompted.
+5. Enter the CLI container using `docker exec -it cli bash`.  All operations on the network will happen within this container from now on. (Refer to the section below)
+
+6. When finished in the CLI, type 'exit', and to bring down the network type `./byfn.sh down`.
 
 ### Install and instantiate the chaincode
 1. Once you're in the CLI container run `cd scripts` to enter the `scripts` folder
