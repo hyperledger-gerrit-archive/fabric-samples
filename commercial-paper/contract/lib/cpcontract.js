@@ -40,10 +40,11 @@ class CommercialPaperContract extends Contract {
     */
     async issue(ctx, issuer, paperNumber, issueDateTime, maturityDateTime, faceValue) {
 
+        // {issuer:"MagnetoCorp", paperNumber:"00001", "May31 2020", "Nov 30 2020", "5M USD"}
         let cp = new CommercialPaper(issuer, paperNumber, issueDateTime, maturityDateTime, faceValue);
 
-        // {issuer:"MagnetoCorp", paperNumber:"00001", "May31 2020", "Nov 30 2020", "5M USD"}
-
+        cp.setIssued();
+        cp.makeKey();
         await ctx.cpList.addPaper(cp);
     }
 

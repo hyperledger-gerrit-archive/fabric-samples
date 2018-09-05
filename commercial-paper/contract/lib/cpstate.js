@@ -17,7 +17,7 @@ const cpState = {
 /**
  * CommercialPaper class defines a commercial paper state
  */
-class CommercialPaper {
+class CommercialPaper extends Asset {
 
     /**
      * Construct a commercial paper.  Initial state is issued.
@@ -29,8 +29,6 @@ class CommercialPaper {
         this.issueDateTime = issueDateTime;
         this.maturityDateTime = maturityDateTime;
         this.faceValue = faceValue;
-        this.currentState = cpState.ISSUED;
-        this.key = CommercialPaper.createKey(issuer, paperNumber);
     }
 
     /**
@@ -46,6 +44,11 @@ class CommercialPaper {
      */
     getKey() {
         return this.key;
+    }
+
+    setKey() {
+        createKey(this.issuer, this.paperNumber);
+        this.key = key;
     }
 
     getIssuer() {
@@ -67,12 +70,20 @@ class CommercialPaper {
     /**
      * Useful methods to encapsulate commercial paper states
      */
+    setIssued() {
+        this.currentState = cpState.ISSUED;
+    }
+
     setTrading() {
         this.currentState = cpState.TRADING;
     }
 
     setRedeemed() {
         this.currentState = cpState.REDEEMED;
+    }
+
+    isIssued() {
+        return this.currentState === cpState.ISSUED;
     }
 
     isTrading() {
@@ -120,8 +131,8 @@ class CommercialPaperList {
      * keys to retrieve data from world state. State data is deserialized
      * into paper object before being returned.
      */
-    async getPaper(key) {
-        let key = this.api.createCompositeKey(this.prefix, [key]);
+    async getPaper([keys]) {
+        let key = this.api.createCompositeKey(this.prefix, [keys]);
         let data = await this.api.getState(key);
         let cp = Utils.deserialize(data);
         return cp;
