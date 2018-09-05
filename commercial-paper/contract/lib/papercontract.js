@@ -4,29 +4,40 @@ SPDX-License-Identifier: Apache-2.0
 
 'use strict';
 
-// Smart contract API brought into scope
-const {Contract} = require('fabric-contract-api');
+// Fabric smart contract classes
+const { Contract, Context } = require('fabric-contract-api');
 
-// Commercial paper classes brought into scope
-const {CommercialPaper, CommercialPaperList} = require('./cpstate.js');
+// PaperNet specifc classes
+const { CommercialPaper } = require('./paper.js');
+
+// Utility classes
+const { StateList } = require('./ledgerutils.js');
 
 /**
- * Define the commercial paper smart contract extending Fabric Contract class
+ * Define custom context for commercial paper by extending Fabric Context class
+ */
+class CommericalPaperContext extends Context {
+
+    constructor() {
+        // All papers held as Fabric states in named list of states
+        this.stateList = new StateList(this, 'org.papernet.commercialpaperlist');
+    }
+
+}
+
+/**
+ * Define commercial paper smart contract by extending Fabric Contract class
  */
 class CommercialPaperContract extends Contract {
 
-    /**
-     * Each smart contract can have a unique namespace; useful when multiple
-     * smart contracts per file.
-     * Use transaction context (ctx) to access list of all commercial papers.
-     */
     constructor() {
+        // Unique namespace when multiple contracts per chaincode file
         super('org.papernet.commercialpaper');
+    }
 
-        this.setBeforeFn = (ctx)=>{
-            ctx.cpList = new CommercialPaperList(ctx, 'COMMERCIALPAPER');
-            return ctx;
-        };
+    // A custom context provides easy access to list of all commercial papers
+    createContext() {
+        return new CommericalPaperContext();
     }
 
     /**
@@ -42,9 +53,13 @@ class CommercialPaperContract extends Contract {
 
         let cp = new CommercialPaper(issuer, paperNumber, issueDateTime, maturityDateTime, faceValue);
 
-        // {issuer:"MagnetoCorp", paperNumber:"00001", "May31 2020", "Nov 30 2020", "5M USD"}
+        // Smart contract, rather than paper, moves paper into ISSUED state
+        cp.setIssued();
 
-        await ctx.cpList.addPaper(cp);
+        // Add the paper to the list of all similar commercial papers in the ledger world state
+        await ctx.stateList.addState(cp);
+
+        return cp.serialize();
     }
 
     /**
@@ -59,11 +74,12 @@ class CommercialPaperContract extends Contract {
     */
     async buy(ctx, issuer, paperNumber, currentOwner, newOwner, price, purchaseDateTime) {
 
-        let cpKey = CommercialPaper.createKey(issuer, paperNumber);
-        let cp = await ctx.cpList.getPaper(cpKey);
+        let cpKey = CommercialPaper.makeKey([issuer, paperNumber]);
+
+        let cp = await ctx.stateList.getState(cpKey);
 
         if (cp.getOwner() !== currentOwner) {
-            throw new Error('Paper '+issuer+paperNumber+' is not owned by '+currentOwner);
+            throw new Error('Paper ' + issuer + paperNumber + ' is not owned by ' + currentOwner);
         }
         // First buy moves state from ISSUED to TRADING
         if (cp.isIssued()) {
@@ -73,10 +89,11 @@ class CommercialPaperContract extends Contract {
         if (cp.IsTrading()) {
             cp.setOwner(newOwner);
         } else {
-            throw new Error('Paper '+issuer+paperNumber+' is not trading. Current state = '+cp.getCurrentState());
+            throw new Error('Paper ' + issuer + paperNumber + ' is not trading. Current state = ' + cp.getCurrentState());
         }
 
-        await ctx.cpList.updatePaper(cp);
+        await ctx.stateList.updateState(cp);
+        return cp.deserialize();
     }
 
     /**
@@ -89,12 +106,13 @@ class CommercialPaperContract extends Contract {
     */
     async redeem(ctx, issuer, paperNumber, redeemingOwner, redeemDateTime) {
 
-        let cpKey = CommercialPaper.createKey(issuer, paperNumber);
-        let cp = await ctx.cpList.getPaper(cpKey);
+        let cpKey = CommercialPaper.makeKey([issuer, paperNumber]);
+
+        let cp = await ctx.stateList.getState(cpKey);
 
         // Check paper is TRADING, not REDEEMED
         if (cp.IsRedeemed()) {
-            throw new Error('Paper '+issuer+paperNumber+' already redeemed');
+            throw new Error('Paper ' + issuer + paperNumber + ' already redeemed');
         }
 
         // Verify that the redeemer owns the commercial paper before redeeming it
@@ -102,10 +120,11 @@ class CommercialPaperContract extends Contract {
             cp.setOwner(cp.getIssuer());
             cp.setRedeemed();
         } else {
-            throw new Error('Redeeming owner does not own paper'+issuer+paperNumber);
+            throw new Error('Redeeming owner does not own paper' + issuer + paperNumber);
         }
 
-        await ctx.cpList.updatePaper(cp);
+        await ctx.stateList.updateState(cp);
+        return cp.serialize();
     }
 
 }
