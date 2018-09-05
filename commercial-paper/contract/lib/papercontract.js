@@ -5,10 +5,10 @@ SPDX-License-Identifier: Apache-2.0
 'use strict';
 
 // Smart contract API brought into scope
-const {Contract} = require('fabric-contract-api');
+const { Contract } = require('fabric-contract-api');
 
 // Commercial paper classes brought into scope
-const {CommercialPaper, CommercialPaperList} = require('./cpstate.js');
+const { CommercialPaper } = require('./paper.js');
 
 /**
  * Define the commercial paper smart contract extending Fabric Contract class
@@ -18,13 +18,13 @@ class CommercialPaperContract extends Contract {
     /**
      * Each smart contract can have a unique namespace; useful when multiple
      * smart contracts per file.
-     * Use transaction context (ctx) to access list of all commercial papers.
+     * Use transaction context (ctx) to access list of ledger assets.
      */
     constructor() {
         super('org.papernet.commercialpaper');
 
-        this.setBeforeFn = (ctx)=>{
-            ctx.cpList = new CommercialPaperList(ctx, 'COMMERCIALPAPER');
+        this.setBeforeFn = (ctx) => {
+            ctx.stateList = new stateList(ctx);
             return ctx;
         };
     }
@@ -40,11 +40,12 @@ class CommercialPaperContract extends Contract {
     */
     async issue(ctx, issuer, paperNumber, issueDateTime, maturityDateTime, faceValue) {
 
+        // {issuer:"MagnetoCorp", paperNumber:"00001", "May31 2020", "Nov 30 2020", "5M USD"}
         let cp = new CommercialPaper(issuer, paperNumber, issueDateTime, maturityDateTime, faceValue);
 
-        // {issuer:"MagnetoCorp", paperNumber:"00001", "May31 2020", "Nov 30 2020", "5M USD"}
-
-        await ctx.cpList.addPaper(cp);
+        cp.setIssued();
+        await ctx.stateList.addState(cp);
+        return CommercialPaper._serialize(cp);
     }
 
     /**
@@ -60,10 +61,10 @@ class CommercialPaperContract extends Contract {
     async buy(ctx, issuer, paperNumber, currentOwner, newOwner, price, purchaseDateTime) {
 
         let cpKey = CommercialPaper.createKey(issuer, paperNumber);
-        let cp = await ctx.cpList.getPaper(cpKey);
+        let cp = await ctx.ledgerList.getPaper(cpKey);
 
         if (cp.getOwner() !== currentOwner) {
-            throw new Error('Paper '+issuer+paperNumber+' is not owned by '+currentOwner);
+            throw new Error('Paper ' + issuer + paperNumber + ' is not owned by ' + currentOwner);
         }
         // First buy moves state from ISSUED to TRADING
         if (cp.isIssued()) {
@@ -73,10 +74,11 @@ class CommercialPaperContract extends Contract {
         if (cp.IsTrading()) {
             cp.setOwner(newOwner);
         } else {
-            throw new Error('Paper '+issuer+paperNumber+' is not trading. Current state = '+cp.getCurrentState());
+            throw new Error('Paper ' + issuer + paperNumber + ' is not trading. Current state = ' + cp.getCurrentState());
         }
 
-        await ctx.cpList.updatePaper(cp);
+        await ctx.ledgerList.updatePaper(cp);
+        return cp;
     }
 
     /**
@@ -90,11 +92,11 @@ class CommercialPaperContract extends Contract {
     async redeem(ctx, issuer, paperNumber, redeemingOwner, redeemDateTime) {
 
         let cpKey = CommercialPaper.createKey(issuer, paperNumber);
-        let cp = await ctx.cpList.getPaper(cpKey);
+        let cp = await ctx.ledgerList.getPaper(cpKey);
 
         // Check paper is TRADING, not REDEEMED
         if (cp.IsRedeemed()) {
-            throw new Error('Paper '+issuer+paperNumber+' already redeemed');
+            throw new Error('Paper ' + issuer + paperNumber + ' already redeemed');
         }
 
         // Verify that the redeemer owns the commercial paper before redeeming it
@@ -102,10 +104,11 @@ class CommercialPaperContract extends Contract {
             cp.setOwner(cp.getIssuer());
             cp.setRedeemed();
         } else {
-            throw new Error('Redeeming owner does not own paper'+issuer+paperNumber);
+            throw new Error('Redeeming owner does not own paper' + issuer + paperNumber);
         }
 
-        await ctx.cpList.updatePaper(cp);
+        await ctx.cledgerList.updatePaper(cp);
+        return cp;
     }
 
 }
