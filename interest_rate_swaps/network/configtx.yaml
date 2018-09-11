@@ -1,0 +1,110 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+Organizations:
+    - &Orderer
+        Name: Orderer
+        ID: orderer
+        MSPDir: crypto-config/ordererOrganizations/example.com/msp
+
+    - &PartyA
+        Name: PartyA
+        ID: partya
+        MSPDir: crypto-config/peerOrganizations/partya.example.com/msp
+        AnchorPeers:
+            - Host: irs-partya
+              Port: 7051
+
+    - &PartyB
+        Name: PartyB
+        ID: partyb
+        MSPDir: crypto-config/peerOrganizations/partyb.example.com/msp
+        AnchorPeers:
+            - Host: irs-partyb
+              Port: 7051
+
+    - &PartyC
+        Name: PartyC
+        ID: partyc
+        MSPDir: crypto-config/peerOrganizations/partyc.example.com/msp
+        AnchorPeers:
+            - Host: irs-partyc
+              Port: 7051
+
+    - &Auditor
+        Name: Auditor
+        ID: auditor
+        MSPDir: crypto-config/peerOrganizations/auditor.example.com/msp
+        AnchorPeers:
+            - Host: irs-auditor
+              Port: 7051
+
+    - &RRProvider
+        Name: RRProvider
+        ID: rr_provider
+        MSPDir: crypto-config/peerOrganizations/rr_provider.example.com/msp
+        AnchorPeers:
+            - Host: irs-rr_provider
+              Port: 7051
+    
+
+Capabilities:
+    Global: &ChannelCapabilities
+        V1_1: true
+
+    Orderer: &OrdererCapabilities
+        V1_1: true
+
+    Application: &ApplicationCapabilities
+        V1_3: true
+
+Application: &ApplicationDefaults
+
+    Organizations:
+
+Orderer: &OrdererDefaults
+    OrdererType: solo
+    Addresses:
+        - irs-orderer:7050
+    BatchTimeout: 2s
+    BatchSize:
+        MaxMessageCount: 10
+        AbsoluteMaxBytes: 99 MB
+        PreferredMaxBytes: 512 KB
+    Kafka:
+        Brokers:
+            - 127.0.0.1:9092
+    Organizations:
+
+Profiles:
+    IRSNetGenesis:
+        Capabilities:
+            <<: *ChannelCapabilities
+        Orderer:
+            <<: *OrdererDefaults
+            Organizations:
+                - *Orderer
+            Capabilities:
+                <<: *OrdererCapabilities
+        Consortiums:
+            SampleConsortium:
+                Organizations:
+                    - *PartyA
+                    - *PartyB
+                    - *PartyC
+                    - *RRProvider
+                    - *Auditor
+    IRSChannel:
+        Consortium: SampleConsortium
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *PartyA
+                - *PartyB
+                - *PartyC
+                - *RRProvider
+                - *Auditor
+            Capabilities:
+                <<: *ApplicationCapabilities
