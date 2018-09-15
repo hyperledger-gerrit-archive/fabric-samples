@@ -18,23 +18,31 @@ The Hyperledger Fabric CA sample demonstrates the following:
 
 ## Running this sample
 
-1. The following images are required to run this sample:
-*hyperledger/fabric-ca-orderer*, *hyperledger/fabric-ca-peer*, and *hyperledger/fabric-ca-tools*
-
-    #### install the images
-    Run the *bootstrap.sh* script provided with this sample to download the
-    required images for fabric-ca sample. For the v1.2.0-rc1 release, you
-    will need to specify the version as follows:
-
-    ```
-    bootstrap.sh 1.2.0-rc1
-    ```
-
-2. To run this sample, simply run the *start.sh* script.  You may do this
+1. To run this sample, simply run the *start.sh* script.  You may do this
 multiple times in a row as needed since the *start.sh* script cleans up before
-starting each time.
+starting each time.  By default, the sample will run with the latest release;
+to run from the daily builds from the master branch, set the `FABRIC_TAG`
+environment variable to `latest` before running the *start.sh* script.
 
-3. To stop the containers which are started by the *start.sh* script, you may run the *stop.sh* script.
+    a. By default, the sample is run against the latest released version of Fabric
+    and Fabric CA.
+
+    b. Older versions of Fabric and Fabric CA can be used by using the environment
+    variable `FABRIC_TAG`. For example, `export FABRIC_TAG=1.2.0` will run the
+    sample against 1.2.0 version of Fabric and Fabric CA.
+
+    c. The sample can also be executed against local copies of Fabric and Fabric CA.
+    Fabric and Fabric CA repositories must be cloned. The following commands
+    will pull down the source code:
+
+    `git clone https://github.com/hyperledger/fabric.git`
+    `git clone https://github.com/hyperledger/fabric-ca.git`
+
+    Then from each repository, need to execute the `make docker` command. This will build
+    the necessary images based on the local source code. Before executing the *start.sh* script,
+    need to set the `FABRIC_TAG` environment variable to 'local', `export FABRIC_TAG=local`.
+
+2. To stop the containers which are started by the *start.sh* script, you may run the *stop.sh* script.
 
 ## Understanding this sample
 
