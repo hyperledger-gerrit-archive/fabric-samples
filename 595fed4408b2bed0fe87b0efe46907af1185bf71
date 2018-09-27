@@ -1,0 +1,8 @@
+Verified+1: Hyperledger Jobbuilder <jobbuilder@jenkins.hyperledger.org>
+Code-Review+2: David Enyeart <enyeart@us.ibm.com>
+Code-Review+2: Manish Sethi <manish.sethi@gmail.com>
+Submitted-by: Manish Sethi <manish.sethi@gmail.com>
+Submitted-at: Thu, 27 Sep 2018 14:09:55 +0000
+Reviewed-on: https://gerrit.hyperledger.org/r/26496
+Project: fabric-samples
+Branch: refs/heads/release-1.2
