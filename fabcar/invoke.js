@@ -63,7 +63,6 @@ Fabric_Client.newDefaultKeyValueStore({ path: store_path
 		chaincodeId: 'fabcar',
 		fcn: '',
 		args: [''],
-		chainId: 'mychannel',
 		txId: tx_id
 	};
 
