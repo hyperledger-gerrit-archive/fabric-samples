@@ -17,7 +17,7 @@ starttime=$(date +%s)
 # Print the usage message
 function printHelp () {
   echo "Usage: "
-  echo "  ./testAPIs.sh -l golang|node"
+  echo "  ./testAPIs.sh -l golang|javascript"
   echo "    -l <language> - chaincode language (defaults to \"golang\")"
 }
 # Language defaults to "golang"
@@ -42,8 +42,9 @@ function setChaincodePath(){
 		"golang")
 		CC_SRC_PATH="github.com/example_cc/go"
 		;;
-		"node")
-		CC_SRC_PATH="$PWD/artifacts/src/github.com/example_cc/node"
+		"javascript")
+    LANGUAGE=node # actual chaincode *runtime* language is node
+		CC_SRC_PATH="$PWD/artifacts/src/github.com/example_cc/javascript"
 		;;
 		*) printf "\n ------ Language $LANGUAGE is not supported yet ------\n"$
 		exit 1

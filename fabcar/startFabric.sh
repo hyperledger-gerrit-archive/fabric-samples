@@ -12,8 +12,9 @@ export MSYS_NO_PATHCONV=1
 starttime=$(date +%s)
 LANGUAGE=${1:-"golang"}
 CC_SRC_PATH=github.com/fabcar/go
-if [ "$LANGUAGE" = "node" -o "$LANGUAGE" = "NODE" ]; then
-	CC_SRC_PATH=/opt/gopath/src/github.com/fabcar/node
+if [ "$LANGUAGE" = "javascript" -o "$LANGUAGE" = "JAVASCRIPT" ]; then
+	LANGUAGE=node # actual chaincode *runtime* language is node
+	CC_SRC_PATH=/opt/gopath/src/github.com/fabcar/javascript
 fi
 
 # clean the keystore
@@ -34,6 +35,6 @@ docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/g
 
 printf "\nTotal setup execution time : $(($(date +%s) - starttime)) secs ...\n\n\n"
 printf "Start by installing required packages run 'npm install'\n"
-printf "Then run 'node enrollAdmin.js', then 'node registerUser'\n\n"
+printf "Then run 'node enrollAdmin.js', then 'node registerUser.js'\n\n"
 printf "The 'node invoke.js' will fail until it has been updated with valid arguments\n"
 printf "The 'node query.js' may be run at anytime once the user has been registered\n\n"
