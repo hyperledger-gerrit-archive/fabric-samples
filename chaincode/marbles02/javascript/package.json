@@ -1,7 +1,7 @@
 {
 	"name": "marbles",
 	"version": "1.0.0",
-	"description": "marbles chaincode implemented in node.js",
+	"description": "marbles chaincode implemented in JavaScript",
 	"engines": {
 		"node": ">=8.4.0",
 		"npm": ">=5.3.0"
