@@ -47,12 +47,12 @@ fi
  echo y | ./eyfn.sh -m down
  echo
 
- echo "############### BYFN,EYFN WITH NODE Chaincode. TEST ################"
+ echo "############### BYFN,EYFN WITH JAVASCRIPT Chaincode. TEST ################"
  echo "####################################################################"
- echo y | ./byfn.sh -m up -l node -t 60
- err_Check $? default-channel-node
- echo y | ./eyfn.sh -m up -l node -t 60
- err_Check $? default-channel-node
+ echo y | ./byfn.sh -m up -l javascript -t 60
+ err_Check $? default-channel-javascript
+ echo y | ./eyfn.sh -m up -l javascript -t 60
+ err_Check $? default-channel-javascript
  echo y | ./eyfn.sh -m down
 
  echo "############### FABRIC-CA SAMPLES TEST ########################"

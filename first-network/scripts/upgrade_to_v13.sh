@@ -24,8 +24,9 @@ COUNTER=1
 MAX_RETRY=5
 
 CC_SRC_PATH="github.com/chaincode/chaincode_example02/go/"
-if [ "$LANGUAGE" = "node" ]; then
-  CC_SRC_PATH="/opt/gopath/src/github.com/chaincode/chaincode_example02/node/"
+if [ "$LANGUAGE" = "javascript" ]; then
+  LANGUAGE=node # actual chaincode *runtime* language is node
+  CC_SRC_PATH="/opt/gopath/src/github.com/chaincode/chaincode_example02/javascript/"
 fi
 
 echo "Channel name : "$CHANNEL_NAME

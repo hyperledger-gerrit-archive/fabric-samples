@@ -47,7 +47,7 @@ function printHelp() {
   echo "    -d <delay> - delay duration in seconds (defaults to 3)"
   echo "    -f <docker-compose-file> - specify which docker-compose file use (defaults to docker-compose-cli.yaml)"
   echo "    -s <dbtype> - the database backend to use: goleveldb (default) or couchdb"
-  echo "    -l <language> - the chaincode language: golang (default) or node"
+  echo "    -l <language> - the chaincode language: golang (default) or javascript"
   echo "    -i <imagetag> - the tag to be used to launch the network (defaults to \"latest\")"
   echo "    -v - verbose mode"
   echo "  byfn.sh -h (print this message)"
@@ -58,7 +58,7 @@ function printHelp() {
   echo "	byfn.sh generate -c mychannel"
   echo "	byfn.sh up -c mychannel -s couchdb"
   echo "        byfn.sh up -c mychannel -s couchdb -i 1.2.x"
-  echo "	byfn.sh up -l node"
+  echo "	byfn.sh up -l javascript"
   echo "	byfn.sh down -c mychannel"
   echo "        byfn.sh upgrade -c mychannel"
   echo
