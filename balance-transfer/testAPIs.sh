@@ -17,11 +17,11 @@ starttime=$(date +%s)
 # Print the usage message
 function printHelp () {
   echo "Usage: "
-  echo "  ./testAPIs.sh -l golang|node"
+  echo "  ./testAPIs.sh -l golang|javascript"
   echo "    -l <language> - chaincode language (defaults to \"golang\")"
 }
 # Language defaults to "golang"
-LANGUAGE="golang"
+CC_SRC_LANGUAGE="golang"
 
 # Parse commandline args
 while getopts "h?l:" opt; do
@@ -30,22 +30,24 @@ while getopts "h?l:" opt; do
       printHelp
       exit 0
     ;;
-    l)  LANGUAGE=$OPTARG
+    l)  CC_SRC_LANGUAGE=$OPTARG
     ;;
   esac
 done
 
 ##set chaincode path
 function setChaincodePath(){
-	LANGUAGE=`echo "$LANGUAGE" | tr '[:upper:]' '[:lower:]'`
-	case "$LANGUAGE" in
+	CC_SRC_LANGUAGE=`echo "$CC_SRC_LANGUAGE" | tr '[:upper:]' '[:lower:]'`
+	case "$CC_SRC_LANGUAGE" in
 		"golang")
+		CC_RUNTIME_LANGUAGE=golang
 		CC_SRC_PATH="github.com/example_cc/go"
 		;;
-		"node")
-		CC_SRC_PATH="$PWD/artifacts/src/github.com/example_cc/node"
+		"javascript")
+		CC_RUNTIME_LANGUAGE=node # chaincode runtime language is node.js
+		CC_SRC_PATH="$PWD/artifacts/src/github.com/example_cc/javascript"
 		;;
-		*) printf "\n ------ Language $LANGUAGE is not supported yet ------\n"$
+		*) printf "\n ------ Language $CC_SRC_LANGUAGE is not supported yet ------\n"$
 		exit 1
 	esac
 }
@@ -122,7 +124,7 @@ curl -s -X POST \
 	\"peers\": [\"peer0.org1.example.com\",\"peer1.org1.example.com\"],
 	\"chaincodeName\":\"mycc\",
 	\"chaincodePath\":\"$CC_SRC_PATH\",
-	\"chaincodeType\": \"$LANGUAGE\",
+	\"chaincodeType\": \"$CC_RUNTIME_LANGUAGE\",
 	\"chaincodeVersion\":\"v0\"
 }"
 echo
@@ -138,7 +140,7 @@ curl -s -X POST \
 	\"peers\": [\"peer0.org2.example.com\",\"peer1.org2.example.com\"],
 	\"chaincodeName\":\"mycc\",
 	\"chaincodePath\":\"$CC_SRC_PATH\",
-	\"chaincodeType\": \"$LANGUAGE\",
+	\"chaincodeType\": \"$CC_RUNTIME_LANGUAGE\",
 	\"chaincodeVersion\":\"v0\"
 }"
 echo
@@ -153,7 +155,7 @@ curl -s -X POST \
   -d "{
 	\"chaincodeName\":\"mycc\",
 	\"chaincodeVersion\":\"v0\",
-	\"chaincodeType\": \"$LANGUAGE\",
+	\"chaincodeType\": \"$CC_RUNTIME_LANGUAGE\",
 	\"args\":[\"a\",\"100\",\"b\",\"200\"]
 }"
 echo

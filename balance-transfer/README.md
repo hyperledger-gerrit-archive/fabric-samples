@@ -27,7 +27,7 @@ Once you have completed the above setup, you will have provisioned a local netwo
 ## Running the sample program
 
 There are two options available for running the balance-transfer sample
-For each of these options, you may choose to run with chaincode written in golang or in node.js.
+For each of these options, you may choose to run with chaincode written in golang or in javascript (node.js).
 
 ### Option 1:
 
@@ -87,9 +87,9 @@ cd fabric-samples/balance-transfer
 
 ./testAPIs.sh -l golang
 
-## OR use node.js chaincode
+## OR use javascript (node.js) chaincode
 
-./testAPIs.sh -l node
+./testAPIs.sh -l javascript
 ```
 
 
