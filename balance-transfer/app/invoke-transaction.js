@@ -34,6 +34,8 @@ const invokeChaincode = async function(peerNames, channelName, chaincodeName, fc
 			logger.error(message);
 			throw new Error(message);
 		}
+		await channel.initialize({discover: true, asLocalhost:true});
+
 		const tx_id = client.newTransactionID();
 		// will need the transaction ID string for the event registration later
 		tx_id_string = tx_id.getTransactionID();
