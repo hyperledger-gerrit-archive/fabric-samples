@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "contracts/javascript"
+		},
+		{
+			"path": "application"
+		},
+		{
+			"path": "certs"
+		}
+	],
+	"settings": {
+		"git.ignoreLimitWarning": true
+	}
+}
