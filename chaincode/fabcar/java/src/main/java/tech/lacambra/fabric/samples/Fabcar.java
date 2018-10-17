@@ -1,0 +1,168 @@
+package tech.lacambra.fabric.samples;
+
+import org.hyperledger.fabric.shim.ChaincodeBase;
+import org.hyperledger.fabric.shim.ChaincodeStub;
+import org.hyperledger.fabric.shim.ledger.KeyValue;
+import org.hyperledger.fabric.shim.ledger.QueryResultsIterator;
+
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.stream.JsonCollectors;
+import java.io.StringReader;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+
+public class Fabcar extends ChaincodeBase {
+
+  private static final Logger LOGGER = Logger.getLogger(Fabcar.class.getName());
+
+  private Map<String, Method> methods;
+
+  public static void main(String[] args) {
+
+    Map<String, Method> methods = new HashMap<>();
+    Stream.of(Fabcar.class.getMethods())
+        .filter(m -> m.isAnnotationPresent(Function.class))
+        .peek(m -> LOGGER.info("[main] Function found: " + m))
+        .forEach(method -> methods.put(method.getName(), method));
+
+    new Fabcar(methods).start(args);
+  }
+
+  public Fabcar(Map<String, Method> methods) {
+    this.methods = methods;
+  }
+
+  public Response init(ChaincodeStub chaincodeStub) {
+    return newSuccessResponse();
+  }
+
+  public Response invoke(ChaincodeStub chaincodeStub) {
+    Response response = executeFunction(chaincodeStub);
+    LOGGER.info("[invoke] Sending response=" + response.getStatus() + " " + response.getMessage());
+    return response;
+  }
+
+  @Function
+  public Response queryCar(ChaincodeStub stub, List<String> args) {
+
+    if (args.size() != 1) {
+      return newErrorResponse("Incorrect number of arguments. Expecting 1. Received " + args);
+    }
+
+    byte[] carAsBytes = stub.getState(args.get(0));
+
+    LOGGER.info(String.format("[queryCar] Get car %s = %s", args.get(0), new String(carAsBytes)));
+
+
+    return newSuccessResponse(carAsBytes);
+  }
+
+  @Function
+  public Response initLedger(ChaincodeStub stub) {
+
+    AtomicInteger i = new AtomicInteger(0);
+    Arrays.asList(
+        new Car("Toyota", "Prius", "blue", "Tomoko"),
+        new Car("Ford", "Mustang", "red", "Brad"),
+        new Car("Hyundai", "Tucson", "green", "Jin Soo"),
+        new Car("Volkswagen", "Passat", "yellow", "Max"),
+        new Car("Tesla", "S", "black", "Adriana"),
+        new Car("Peugeot", "205", "purple", "Michel"),
+        new Car("Chery", "S22L", "white", "Aarav"),
+        new Car("Fiat", "Punto", "violet", "Pari"),
+        new Car("Tata", "Nano", "indigo", "Valeria"),
+        new Car("Holden", "Barina", "brown", "Shotaro")
+    ).stream()
+        .map(Car::toJson)
+        .peek(c -> stub.putStringState(String.valueOf("CAR" + i.getAndIncrement()), c.toString()))
+        .forEach(c -> LOGGER.info("[initLedger] Added car: " + c));
+
+    return newSuccessResponse();
+  }
+
+  @Function
+  public Response createCar(ChaincodeStub stub, List<String> args) {
+
+    if (args.size() != 5) {
+      return newErrorResponse("Incorrect number of arguments. Expecting 5");
+    }
+
+    Car car = new Car(args.get(1), args.get(2), args.get(3), args.get(4));
+    String carAsString = car.toJson().toString();
+    stub.putStringState(args.get(0), carAsString);
+
+    return newSuccessResponse();
+  }
+
+  @Function
+  public Response queryAllCars(ChaincodeStub stub) {
+
+    String startKey = "CAR0";
+    String endKey = "CAR999";
+
+    try (QueryResultsIterator<KeyValue> it = stub.getStateByRange(startKey, endKey)) {
+
+      JsonArray arr = StreamSupport.stream(it.spliterator(), false).map(this::toJsonRecord).collect(JsonCollectors.toJsonArray());
+      LOGGER.info("[queryAllCars] CARS=" + arr);
+      return newSuccessResponse(arr.toString().getBytes());
+
+    } catch (Exception e) {
+      return newErrorResponse(e);
+    }
+  }
+
+  @Function
+  public Response changeCarOwner(ChaincodeStub stub, List<String> args) {
+
+    if (args.size() != 2) {
+      return newErrorResponse("Incorrect number of arguments. Expecting 2");
+    }
+
+    Car car = Car.fromJson(stub.getStringState(args.get(0)));
+    car.setOwner(args.get(1));
+
+    stub.putStringState(args.get(0), car.toJson().toString());
+
+    return newSuccessResponse();
+  }
+
+  private JsonObject toJsonRecord(KeyValue kv) {
+
+    JsonObject recordJson = Json.createReader(new StringReader(kv.getStringValue())).readObject();
+    return Json.createObjectBuilder().add("Key", kv.getKey()).add("Record", recordJson).build();
+
+  }
+
+
+  private Response executeFunction(ChaincodeStub chaincodeStub) {
+
+    String fnName = chaincodeStub.getFunction();
+    Method function = methods.get(fnName);
+    LOGGER.info("[invoke] Executing function=" + fnName + ". Method=" + function.toString());
+
+    if (function == null) {
+      return newErrorResponse("Invalid SmartContract function name: " + fnName);
+    }
+
+    LOGGER.info("[invoke] invoking function " + fnName);
+
+    try {
+      return function.getParameterCount() == 1 ? (Response) function.invoke(this, chaincodeStub) :
+          (Response) function.invoke(this, chaincodeStub, chaincodeStub.getParameters());
+    } catch (IllegalAccessException | InvocationTargetException e) {
+      return newErrorResponse(e.getMessage());
+    }
+
+  }
+}
