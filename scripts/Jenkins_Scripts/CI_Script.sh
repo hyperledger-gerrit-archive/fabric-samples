@@ -8,10 +8,10 @@
 # exit on first error
 
 export BASE_FOLDER=$WORKSPACE/gopath/src/github.com/hyperledger
-export PROJECT_VERSION=1.3.0-stable
+export PROJECT_VERSION=1.3.1-stable
 export NEXUS_URL=nexus3.hyperledger.org:10001
 export ORG_NAME="hyperledger/fabric"
-export NODE_VER=8.9.4 # Default nodejs version
+export NODE_VER=8.11.3 # Default nodejs version on release-1.3
 
 # Fetch baseimage version
 curl -L https://raw.githubusercontent.com/hyperledger/fabric/master/Makefile > Makefile
@@ -126,7 +126,7 @@ setGopath() {
 	echo
 	export GOPATH=$WORKSPACE/gopath
 	export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
-        export PATH=$GOROOT/bin:$GOPATH/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:~/npm/bin:/home/jenkins/.nvm/versions/node/v6.9.5/bin:/home/jenkins/.nvm/versions/node/v$NODE_VER/bin:$PATH
+        export PATH=$GOROOT/bin:$GOPATH/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:~/npm/bin:/home/jenkins/.nvm/versions/node/v$NODE_VER/bin:$PATH
         export GOROOT=/opt/go/go$GO_VER.linux.$OS_VER
 	export PATH=$GOROOT/bin:$PATH
 }

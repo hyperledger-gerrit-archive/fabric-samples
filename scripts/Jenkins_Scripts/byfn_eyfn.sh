@@ -9,7 +9,7 @@ ARCH=$(dpkg --print-architecture)
 echo "-----------> ARCH" $ARCH
 MARCH=$(uname -s|tr '[:upper:]' '[:lower:]')
 echo "-----------> MARCH" $MARCH
-VERSION=1.3.0
+VERSION=1.3.1
 MVN_METADATA=$(echo "https://nexus.hyperledger.org/content/repositories/releases/org/hyperledger/fabric/hyperledger-fabric-$VERSION-stable/maven-metadata.xml")
 curl -L "$MVN_METADATA" > maven-metadata.xml
 RELEASE_TAG=$(cat maven-metadata.xml | grep release)
@@ -53,6 +53,14 @@ fi
  err_Check $? default-channel-node
  echo y | ./eyfn.sh -m up -l node -t 60
  err_Check $? default-channel-node
+ echo y | ./eyfn.sh -m down
+
+echo "############### BYFN,EYFN WITH JAVA Chaincode. TEST ################"
+ echo "####################################################################"
+ echo y | ./byfn.sh -m up -l java -t 60
+ err_Check $? default-channel-java
+ echo y | ./eyfn.sh -m up -l java -t 60
+ err_Check $? default-channel-java
  echo y | ./eyfn.sh -m down
 
  echo "############### FABRIC-CA SAMPLES TEST ########################"
