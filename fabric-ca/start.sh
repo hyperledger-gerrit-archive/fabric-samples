@@ -45,6 +45,12 @@ if [ -d ${DDIR} ]; then
 fi
 mkdir -p ${DDIR}/logs
 
+# host's user ownership info.
+cat > ${DDIR}/.host_env <<EOF
+HOST_USER=$(id -u)
+HOST_GROUP=$(id -g)
+EOF
+
 # Create the docker-compose file
 ${SDIR}/makeDocker.sh
 

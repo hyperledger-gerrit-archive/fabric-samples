@@ -103,6 +103,7 @@ function main {
    queryAsRevokedUser
    if [ "$?" -ne 0 ]; then
       logr "The revoked user $USER_NAME should have failed to query the chaincode in the channel '$CHANNEL_NAME'"
+      changeOwnership
       exit 1
    fi
    logr "Congratulations! The tests ran successfully."
@@ -271,9 +272,11 @@ function finish {
    if [ "$done" = true ]; then
       logr "See $RUN_LOGFILE for more details"
       touch /$RUN_SUCCESS_FILE
+      changeOwnership
    else
       logr "Tests did not complete successfully; see $RUN_LOGFILE for more details"
       touch /$RUN_FAIL_FILE
+      changeOwnership
       exit 1
    fi
 }
@@ -285,7 +288,14 @@ function logr {
 
 function fatalr {
    logr "FATAL: $*"
+   changeOwnership
    exit 1
+}
+
+function changeOwnership {
+   # to change root:root ownership to the host user's ownership.
+   source /$DATA/.host_env
+   chown -R $HOST_USER:$HOST_GROUP /$DATA
 }
 
 main

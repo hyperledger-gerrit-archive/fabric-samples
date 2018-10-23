@@ -59,5 +59,11 @@ fi
  echo "###############################################################"
  cd $WORKSPACE/gopath/src/github.com/hyperledger/fabric-samples/fabric-ca
  ./start.sh
- err_Check $? fabric-ca
+ err_Check $? fabric-ca start
  ./stop.sh
+ err_Check $? frabic-ca stop
+ ./start.sh
+ err_Check $? fabric-ca re-start
+ ./stop.sh
+ err_Check $? fabric-ca stop
+
