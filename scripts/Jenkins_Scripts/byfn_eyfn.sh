@@ -89,5 +89,10 @@ fi
  echo "###############################################################"
  cd $WORKSPACE/gopath/src/github.com/hyperledger/fabric-samples/fabric-ca
  ./start.sh
- copy_logs $? fabric-ca
+ copy_logs $? fabric-ca start
  ./stop.sh
+ copy_logs $? fabric-ca stop
+./start.sh
+ copy_logs $? fabric-ca re-start
+  ./stop.sh
+ copy_logs $? fabric-ca stop
