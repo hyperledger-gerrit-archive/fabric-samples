@@ -276,6 +276,8 @@ function finish {
       touch /$RUN_FAIL_FILE
       exit 1
    fi
+
+   changeOwnership
 }
 
 function logr {
@@ -285,7 +287,14 @@ function logr {
 
 function fatalr {
    logr "FATAL: $*"
+   changeOwnership
    exit 1
+}
+
+function changeOwnership {
+   # to change root:root ownership to the host user's ownership.
+   source /$DATA/.host_env
+   chown -R $HOST_USER:$HOST_GROUP /$DATA
 }
 
 main
