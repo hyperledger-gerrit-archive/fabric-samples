@@ -9,21 +9,15 @@ ARCH=$(dpkg --print-architecture)
 echo "-----------> ARCH" $ARCH
 MARCH=$(uname -s|tr '[:upper:]' '[:lower:]')
 echo "-----------> MARCH" $MARCH
-VERSION=1.2.1
-MVN_METADATA=$(echo "https://nexus.hyperledger.org/content/repositories/releases/org/hyperledger/fabric/hyperledger-fabric-$VERSION-stable/maven-metadata.xml")
-curl -L "$MVN_METADATA" > maven-metadata.xml
-RELEASE_TAG=$(cat maven-metadata.xml | grep release)
-COMMIT=$(echo $RELEASE_TAG | awk -F - '{ print $4 }' | cut -d "<" -f1)
-echo "-----------> BASE_VERSION = $VERSION"
 cd $BASE_FOLDER/fabric-samples || exit
-curl https://nexus.hyperledger.org/content/repositories/releases/org/hyperledger/fabric/hyperledger-fabric-$VERSION-stable/$MARCH-$ARCH.$VERSION-stable-$COMMIT/hyperledger-fabric-$VERSION-stable-$MARCH-$ARCH.$VERSION-stable-$COMMIT.tar.gz | tar xz
+curl https://nexus.hyperledger.org/content/repositories/releases/org/hyperledger/fabric/hyperledger-fabric/$MARCH-$ARCH-$VERSION/hyperledger-fabric-$MARCH-$ARCH-$VERSION.tar.gz | tar xz
 
 cd first-network || exit
 export PATH=gopath/src/github.com/hyperledger/fabric-samples/bin:$PATH
 
 err_Check() {
 if [ $1 != 0 ]; then
-    echo "Error: -----------> $2 test case failed"
+    echo -e "\033[31m FAILED: -------> $2 test case failed" "\033[0m"
     exit 1
 fi
 }
