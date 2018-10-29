@@ -7,20 +7,56 @@ SPDX-License-Identifier: Apache-2.0
 // ====CHAINCODE EXECUTION SAMPLES (CLI) ==================
 
 // ==== Invoke marbles ====
-// peer chaincode invoke -C mychannel -n marblesp -c '{"Args":["initMarble","marble1","blue","35","tom","99"]}'
-// peer chaincode invoke -C mychannel -n marblesp -c '{"Args":["initMarble","marble2","red","50","tom","102"]}'
-// peer chaincode invoke -C mychannel -n marblesp -c '{"Args":["initMarble","marble3","blue","70","tom","103"]}'
-// peer chaincode invoke -C mychannel -n marblesp -c '{"Args":["transferMarble","marble2","jerry"]}'
-// peer chaincode invoke -C mychannel -n marblesp -c '{"Args":["delete","marble1"]}'
+// All attributes will be passed as transient data
+// Transient data in the following examples are base64 encoded and stored as
+// environment variables
+
+// MARBLENAME=$(echo -n marble1 | base64)
+// COLOR=$(echo -n blue | base64)
+// SIZE=$(echo -n 35 | base64)
+// OWNER=$(echo -n tom | base64)
+// PRICE=$(echo -n 99 | base64)
+// peer chaincode invoke -C mychannel -n marblesp -c '{"Args":["initMarble"]}' --transient "{\"marblename\":\"$MARBLENAME\",\"color\":\"$COLOR\",\"size\":\"$SIZE\",\"owner\":\"$OWNER\",\"price\":\"$PRICE\"}"
+
+// MARBLENAME=$(echo -n marble2 | base64)
+// COLOR=$(echo -n red | base64)
+// SIZE=$(echo -n 50 | base64)
+// OWNER=$(echo -n tom | base64)
+// PRICE=$(echo -n 102 | base64)
+// peer chaincode invoke -C mychannel -n marblesp -c '{"Args":["initMarble"]}' --transient "{\"marblename\":\"$MARBLENAME\",\"color\":\"$COLOR\",\"owner\":\"$OWNER\",\"size\":\"$SIZE\",\"price\":\"$PRICE\"}"
+
+// MARBLENAME=$(echo -n marble3 | base64)
+// COLOR=$(echo -n blue | base64)
+// SIZE=$(echo -n 70 | base64)
+// OWNER=$(echo -n tom | base64)
+// PRICE=$(echo -n 103 | base64)
+// peer chaincode invoke -C mychannel -n marblesp -c '{"Args":["initMarble"]}' --transient "{\"marblename\":\"$MARBLENAME\",\"color\":\"$COLOR\",\"size\":\"$SIZE\",\"owner\":\"$OWNER\",\"price\":\"$PRICE\"}"
+
+// MARBLENAME=$(echo -n marble3 | base64)
+// NEWOWNER=$(echo -n jerry | base64)
+// peer chaincode invoke -C mychannel -n marblesp -c '{"Args":["transferMarble"]}' --transient "{\"marblename\":\"$MARBLENAME\",\"newowner\":\"$NEWOWNER\"}"
+
+// MARBLENAME=$(echo -n marble1 | base64)
+// peer chaincode invoke -C mychannel -n marblesp -c '{"Args":["delete"]}' --transient "{\"marblename\":\"$MARBLENAME\"}"
 
 // ==== Query marbles ====
-// peer chaincode query -C mychannel -n marblesp -c '{"Args":["readMarble","marble1"]}'
-// peer chaincode query -C mychannel -n marblesp -c '{"Args":["readMarblePrivateDetails","marble1"]}'
-// peer chaincode query -C mychannel -n marblesp -c '{"Args":["getMarblesByRange","marble1","marble3"]}'
+// MARBLENAME=$(echo -n marble1 | base64)
+// peer chaincode query -C mychannel -n marblesp -c '{"Args":["readMarble"]}'  --transient "{\"marblename\":\"$MARBLENAME\"}"
+
+// MARBLENAME=$(echo -n marble1 | base64)
+// peer chaincode query -C mychannel -n marblesp -c '{"Args":["readMarblePrivateDetails"]}' --transient "{\"marblename\":\"$MARBLENAME\"}"
+
+// STARTKEY=$(echo -n marble1 | base64)
+// ENDKEY=$(echo -n marble3 | base64)
+// peer chaincode query -C mychannel -n marblesp -c '{"Args":["getMarblesByRange"]}' --transient "{\"startkey\":\"$STARTKEY\",\"endkey\":\"$ENDKEY\"}"
 
 // Rich Query (Only supported if CouchDB is used as state database):
-//   peer chaincode query -C mychannel -n marblesp -c '{"Args":["queryMarblesByOwner","tom"]}'
-//   peer chaincode query -C mychannel -n marblesp -c '{"Args":["queryMarbles","{\"selector\":{\"owner\":\"tom\"}}"]}'
+
+// OWNER=$(echo -n tom | base64)
+// peer chaincode query -C mychannel -n marblesp -c '{"Args":["queryMarblesByOwner"]}' --transient "{\"owner\":\"$OWNER\"}"
+
+// QUERY=$(echo -n {\"selector\":{\"owner\":\"tom\"}} | base64)
+// peer chaincode query -C mychannel -n marblesp -c '{"Args":["queryMarbles"]}' --transient "{\"query\":\"$QUERY\"}"
 
 // INDEXES TO SUPPORT COUCHDB RICH QUERIES
 //
@@ -90,6 +126,8 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
+
+var logger = shim.NewLogger("MarlbesChaincode")
 
 // SimpleChaincode example simple Chaincode implementation
 type SimpleChaincode struct {
@@ -173,39 +211,41 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 func (t *SimpleChaincode) initMarble(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	var err error
 
-	//  0-name  1-color  2-size  3-owner  4-price
-	// "asdf",  "blue",  "35",   "bob",   "99"
-	if len(args) != 5 {
-		return shim.Error("Incorrect number of arguments. Expecting 5")
-	}
-
 	// ==== Input sanitation ====
 	fmt.Println("- start init marble")
-	if len(args[0]) == 0 {
-		return shim.Error("1st argument must be a non-empty string")
+
+	if len(args) != 0 {
+		return shim.Error("Incorrect number of arguments. All attributes must be included in the transient map.")
 	}
-	if len(args[1]) == 0 {
-		return shim.Error("2nd argument must be a non-empty string")
-	}
-	if len(args[2]) == 0 {
-		return shim.Error("3rd argument must be a non-empty string")
-	}
-	if len(args[3]) == 0 {
-		return shim.Error("4th argument must be a non-empty string")
-	}
-	if len(args[4]) == 0 {
-		return shim.Error("5th argument must be a non-empty string")
-	}
-	marbleName := args[0]
-	color := strings.ToLower(args[1])
-	owner := strings.ToLower(args[3])
-	size, err := strconv.Atoi(args[2])
+
+	// Transient map must include marblename, color, owner, size, price
+	transMap, err := stub.GetTransient()
 	if err != nil {
-		return shim.Error("3rd argument must be a numeric string")
+		return shim.Error("Error getting transient: " + err.Error())
 	}
-	price, err := strconv.Atoi(args[4])
+
+	marbleName := string(transMap["marblename"])
+	if len(marbleName) == 0 {
+		return shim.Error("marblename must be a non-empty string")
+	}
+	color := string(transMap["color"])
+	if len(color) == 0 {
+		return shim.Error("color must be a non-empty string")
+	}
+	owner := string(transMap["owner"])
+	if len(owner) == 0 {
+		return shim.Error("owner must be a non-empty string")
+	}
+	sizeString := string(transMap["size"])
+	priceString := string(transMap["price"])
+
+	size, err := strconv.Atoi(sizeString)
 	if err != nil {
-		return shim.Error("5th argument must be a numeric string")
+		return shim.Error("size from map must be a numeric string")
+	}
+	price, err := strconv.Atoi(priceString)
+	if err != nil {
+		return shim.Error("Price from map must be a numeric string: " + err.Error())
 	}
 
 	// ==== Check if marble already exists ====
@@ -270,20 +310,30 @@ func (t *SimpleChaincode) initMarble(stub shim.ChaincodeStubInterface, args []st
 // readMarble - read a marble from chaincode state
 // ===============================================
 func (t *SimpleChaincode) readMarble(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	var name, jsonResp string
+	var jsonResp string
 	var err error
 
-	if len(args) != 1 {
-		return shim.Error("Incorrect number of arguments. Expecting name of the marble to query")
+	if len(args) != 0 {
+		return shim.Error("Incorrect number of arguments. All attributes must be included in the transient map.")
 	}
 
-	name = args[0]
-	valAsbytes, err := stub.GetPrivateData("collectionMarbles", name) //get the marble from chaincode state
+	// Transient map must include marblename
+	transMap, err := stub.GetTransient()
 	if err != nil {
-		jsonResp = "{\"Error\":\"Failed to get state for " + name + "\"}"
+		return shim.Error("Error getting transient: " + err.Error())
+	}
+
+	marbleName := string(transMap["marblename"])
+	if len(marbleName) == 0 {
+		return shim.Error("marblename must be a non-empty string")
+	}
+
+	valAsbytes, err := stub.GetPrivateData("collectionMarbles", marbleName) //get the marble from chaincode state
+	if err != nil {
+		jsonResp = "{\"Error\":\"Failed to get state for " + marbleName + "\"}"
 		return shim.Error(jsonResp)
 	} else if valAsbytes == nil {
-		jsonResp = "{\"Error\":\"Marble does not exist: " + name + "\"}"
+		jsonResp = "{\"Error\":\"Marble does not exist: " + marbleName + "\"}"
 		return shim.Error(jsonResp)
 	}
 
@@ -294,20 +344,30 @@ func (t *SimpleChaincode) readMarble(stub shim.ChaincodeStubInterface, args []st
 // readMarblereadMarblePrivateDetails - read a marble private details from chaincode state
 // ===============================================
 func (t *SimpleChaincode) readMarblePrivateDetails(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	var name, jsonResp string
+	var jsonResp string
 	var err error
 
-	if len(args) != 1 {
-		return shim.Error("Incorrect number of arguments. Expecting name of the marble to query")
+	if len(args) != 0 {
+		return shim.Error("Incorrect number of arguments. All attributes must be included in the transient map.")
 	}
 
-	name = args[0]
-	valAsbytes, err := stub.GetPrivateData("collectionMarblePrivateDetails", name) //get the marble private details from chaincode state
+	// Transient map must include marblename
+	transMap, err := stub.GetTransient()
 	if err != nil {
-		jsonResp = "{\"Error\":\"Failed to get private details for " + name + ": " + err.Error() + "\"}"
+		return shim.Error("Error getting transient: " + err.Error())
+	}
+
+	marbleName := string(transMap["marblename"])
+	if len(marbleName) == 0 {
+		return shim.Error("marblename must be a non-empty string")
+	}
+
+	valAsbytes, err := stub.GetPrivateData("collectionMarblePrivateDetails", marbleName) //get the marble private details from chaincode state
+	if err != nil {
+		jsonResp = "{\"Error\":\"Failed to get private details for " + marbleName + ": " + err.Error() + "\"}"
 		return shim.Error(jsonResp)
 	} else if valAsbytes == nil {
-		jsonResp = "{\"Error\":\"Marble private details does not exist: " + name + "\"}"
+		jsonResp = "{\"Error\":\"Marble private details does not exist: " + marbleName + "\"}"
 		return shim.Error(jsonResp)
 	}
 
@@ -320,10 +380,21 @@ func (t *SimpleChaincode) readMarblePrivateDetails(stub shim.ChaincodeStubInterf
 func (t *SimpleChaincode) delete(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	var jsonResp string
 	var marbleJSON marble
-	if len(args) != 1 {
-		return shim.Error("Incorrect number of arguments. Expecting 1")
+
+	if len(args) != 0 {
+		return shim.Error("Incorrect number of arguments. All attributes must be included in the transient map.")
 	}
-	marbleName := args[0]
+
+	// Transient map must include marblename
+	transMap, err := stub.GetTransient()
+	if err != nil {
+		return shim.Error("Error getting transient: " + err.Error())
+	}
+
+	marbleName := string(transMap["marblename"])
+	if len(marbleName) == 0 {
+		return shim.Error("marblename must be a non-empty string")
+	}
 
 	// to maintain the color~name index, we need to read the marble first and get its color
 	valAsbytes, err := stub.GetPrivateData("collectionMarbles", marbleName) //get the marble from chaincode state
@@ -373,14 +444,25 @@ func (t *SimpleChaincode) delete(stub shim.ChaincodeStubInterface, args []string
 // ===========================================================
 func (t *SimpleChaincode) transferMarble(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
-	//   0       1
-	// "name", "bob"
-	if len(args) < 2 {
-		return shim.Error("Incorrect number of arguments. Expecting 2")
+	if len(args) != 0 {
+		return shim.Error("Incorrect number of arguments. All attributes must be included in the transient map.")
 	}
 
-	marbleName := args[0]
-	newOwner := strings.ToLower(args[1])
+	// Transient map must include marblename, newowner
+	transMap, err := stub.GetTransient()
+	if err != nil {
+		return shim.Error("Error getting transient: " + err.Error())
+	}
+
+	marbleName := string(transMap["marblename"])
+	if len(marbleName) == 0 {
+		return shim.Error("marblename must be a non-empty string")
+	}
+	newOwner := string(transMap["newowner"])
+	if len(newOwner) == 0 {
+		return shim.Error("newowner must be a non-empty string")
+	}
+
 	fmt.Println("- start transferMarble ", marbleName, newOwner)
 
 	marbleAsBytes, err := stub.GetPrivateData("collectionMarbles", marbleName)
@@ -420,14 +502,20 @@ func (t *SimpleChaincode) transferMarble(stub shim.ChaincodeStubInterface, args 
 // ===========================================================================================
 func (t *SimpleChaincode) getMarblesByRange(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
-	if len(args) < 2 {
-		return shim.Error("Incorrect number of arguments. Expecting 2")
+	if len(args) != 0 {
+		return shim.Error("Incorrect number of arguments. All attributes must be included in the transient map.")
 	}
 
-	startKey := args[0]
-	endKey := args[1]
+	// Transient map must include startkey, endkey
+	transMap, err := stub.GetTransient()
+	if err != nil {
+		return shim.Error("Error getting transient: " + err.Error())
+	}
 
-	resultsIterator, err := stub.GetPrivateDataByRange("collectionMarbles", startKey, endKey)
+	startkey := string(transMap["startkey"])
+	endkey := string(transMap["endkey"])
+
+	resultsIterator, err := stub.GetPrivateDataByRange("collectionMarbles", startkey, endkey)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
@@ -475,14 +563,25 @@ func (t *SimpleChaincode) getMarblesByRange(stub shim.ChaincodeStubInterface, ar
 // ===========================================================================================
 func (t *SimpleChaincode) transferMarblesBasedOnColor(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
-	//   0       1
-	// "color", "bob"
-	if len(args) < 2 {
-		return shim.Error("Incorrect number of arguments. Expecting 2")
+	if len(args) != 0 {
+		return shim.Error("Incorrect number of arguments. All attributes must be included in the transient map.")
 	}
 
-	color := args[0]
-	newOwner := strings.ToLower(args[1])
+	// Transient map must include color, newowner
+	transMap, err := stub.GetTransient()
+	if err != nil {
+		return shim.Error("Error getting transient: " + err.Error())
+	}
+
+	color := string(transMap["color"])
+	if len(color) == 0 {
+		return shim.Error("color must be a non-empty string")
+	}
+	newOwner := string(transMap["newowner"])
+	if len(newOwner) == 0 {
+		return shim.Error("owner must be a non-empty string")
+	}
+
 	fmt.Println("- start transferMarblesBasedOnColor ", color, newOwner)
 
 	// Query the color~name index by color
@@ -546,13 +645,21 @@ func (t *SimpleChaincode) transferMarblesBasedOnColor(stub shim.ChaincodeStubInt
 // =========================================================================================
 func (t *SimpleChaincode) queryMarblesByOwner(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
-	//   0
-	// "bob"
-	if len(args) < 1 {
-		return shim.Error("Incorrect number of arguments. Expecting 1")
+	if len(args) != 0 {
+		return shim.Error("Incorrect number of arguments. Expecting 0")
 	}
 
-	owner := strings.ToLower(args[0])
+	// Transient map must include owner
+	transMap, err := stub.GetTransient()
+	if err != nil {
+		return shim.Error("Error getting transient: " + err.Error())
+	}
+
+	owner := string(transMap["owner"])
+	if len(owner) == 0 {
+		return shim.Error("owner must be a non-empty string")
+	}
+	owner = strings.ToLower(owner)
 
 	queryString := fmt.Sprintf("{\"selector\":{\"docType\":\"marble\",\"owner\":\"%s\"}}", owner)
 
@@ -572,13 +679,20 @@ func (t *SimpleChaincode) queryMarblesByOwner(stub shim.ChaincodeStubInterface, 
 // =========================================================================================
 func (t *SimpleChaincode) queryMarbles(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
-	//   0
-	// "queryString"
-	if len(args) < 1 {
-		return shim.Error("Incorrect number of arguments. Expecting 1")
+	if len(args) != 0 {
+		return shim.Error("Incorrect number of arguments. All attributes must be included in the transient map.")
 	}
 
-	queryString := args[0]
+	// Transient map must include query
+	transMap, err := stub.GetTransient()
+	if err != nil {
+		return shim.Error("Error getting transient: " + err.Error())
+	}
+
+	queryString := string(transMap["query"])
+	if len(queryString) == 0 {
+		return shim.Error("query must be a non-empty string")
+	}
 
 	queryResults, err := getQueryResultForQueryString(stub, queryString)
 	if err != nil {
