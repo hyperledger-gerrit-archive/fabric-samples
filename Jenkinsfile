@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// Pipeline script for fabric-samples
+// Pipeline script for fabric-samples release-1.3
 
 node ('hyp-x') { // trigger build on x86_64 node
   timestamps {
