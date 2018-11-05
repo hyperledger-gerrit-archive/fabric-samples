@@ -1,5 +1,6 @@
 [//]: # (SPDX-License-Identifier: CC-BY-4.0)
 
+TEST
 ## Hyperledger Fabric Samples
 
 Please visit the [installation instructions](http://hyperledger-fabric.readthedocs.io/en/latest/install.html)
