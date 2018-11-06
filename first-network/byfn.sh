@@ -35,7 +35,7 @@ export VERBOSE=false
 # Print the usage message
 function printHelp() {
   echo "Usage: "
-  echo "  byfn.sh <mode> [-c <channel name>] [-t <timeout>] [-d <delay>] [-f <docker-compose-file>] [-s <dbtype>] [-l <language>] [-i <imagetag>] [-v]"
+  echo "  byfn.sh <mode> [-c <channel name>] [-t <timeout>] [-d <delay>] [-f <docker-compose-file>] [-s <dbtype>] [-l <language>] [-o <consensus-type>] [-i <imagetag>] [-v]"
   echo "    <mode> - one of 'up', 'down', 'restart', 'generate' or 'upgrade'"
   echo "      - 'up' - bring up the network with docker-compose up"
   echo "      - 'down' - clear the network with docker-compose down"
@@ -49,6 +49,7 @@ function printHelp() {
   echo "    -s <dbtype> - the database backend to use: goleveldb (default) or couchdb"
   echo "    -l <language> - the chaincode language: golang (default) or node"
   echo "    -i <imagetag> - the tag to be used to launch the network (defaults to \"latest\")"
+  echo "    -o <consensus-type> - the consensus-type of the ordering service: solo (default) or etcdraft"
   echo "    -v - verbose mode"
   echo "  byfn.sh -h (print this message)"
   echo
@@ -382,8 +383,17 @@ function generateChannelArtifacts() {
   echo "##########################################################"
   # Note: For some unknown reason (at least for now) the block file can't be
   # named orderer.genesis.block or the orderer will fail to launch!
+  echo "CONSENSUS_TYPE="$CONSENSUS_TYPE
   set -x
-  configtxgen -profile TwoOrgsOrdererGenesis -channelID byfn-sys-channel -outputBlock ./channel-artifacts/genesis.block
+  if [ "$CONSENSUS_TYPE" == "solo" ]; then
+    configtxgen -profile TwoOrgsOrdererGenesis -channelID byfn-sys-channel -outputBlock ./channel-artifacts/genesis.block
+  elif [ "$CONSENSUS_TYPE" == "etcdraft" ]; then
+    configtxgen -profile SampleDevModeEtcdRaft -channelID byfn-sys-channel -outputBlock ./channel-artifacts/genesis.block
+  else
+    set +x
+    echo "unrecognized CONSESUS_TYPE='$CONSENSUS_TYPE'. exiting"
+    exit 1
+  fi
   res=$?
   set +x
   if [ $res -ne 0 ]; then
@@ -453,6 +463,8 @@ COMPOSE_FILE_ORG3=docker-compose-org3.yaml
 LANGUAGE=golang
 # default image tag
 IMAGETAG="latest"
+# default consensus type
+CONSENSUS_TYPE="solo"
 # Parse commandline args
 if [ "$1" = "-m" ]; then # supports old usage, muscle memory is powerful!
   shift
@@ -475,7 +487,7 @@ else
   exit 1
 fi
 
-while getopts "h?c:t:d:f:s:l:i:v" opt; do
+while getopts "h?c:t:d:f:s:l:i:o:v" opt; do
   case "$opt" in
   h | \?)
     printHelp
@@ -501,6 +513,9 @@ while getopts "h?c:t:d:f:s:l:i:v" opt; do
     ;;
   i)
     IMAGETAG=$(go env GOARCH)"-"$OPTARG
+    ;;
+   o)
+    CONSENSUS_TYPE=$OPTARG
     ;;
   v)
     VERBOSE=true
