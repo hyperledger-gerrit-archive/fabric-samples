@@ -4,6 +4,8 @@
 .#*
 # Vim file artifacts
 .*.sw*
+# IDE files 
+/.idea
 # installed platform-specific binaries
 /bin
 /config
