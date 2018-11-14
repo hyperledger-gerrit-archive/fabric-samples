@@ -1,0 +1,33 @@
+{
+  "name": "reserve-auction",
+  "version": "1.0.0",
+  "description": "A reserve price auction example node program to demonstrate use of private data feature in hlf-v1.2",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "hyperledger",
+    "private",
+    "data",
+    "fabric",
+    "sdk"
+  ],
+  "author": "sheetal",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.17.1",
+    "cookie-parser": "^1.4.3",
+    "cors": "^2.8.3",
+    "express": "^4.15.2",
+    "express-bearer-token": "^2.1.0",
+    "express-jwt": "^5.1.0",
+    "express-session": "^1.15.2",
+    "fabric-ca-client": "~1.3.0",
+    "fabric-client": "~1.3.0",
+    "fs-extra": "^2.0.0",
+    "hf_sdk_node_wrapper": "file:lib/hf_sdk_node_wrapper",
+    "jsonwebtoken": "^7.3.0",
+    "log4js": "^0.6.38"
+  }
+}

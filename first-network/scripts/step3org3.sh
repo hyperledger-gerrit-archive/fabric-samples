@@ -43,7 +43,7 @@ echo "===================== Installing chaincode 2.0 on peer0.org2 =============
 installChaincode 0 2 2.0
 
 echo "===================== Upgrading chaincode on peer0.org1 ===================== "
-upgradeChaincode 0 1
+upgradeChaincodeToAddOrg 0 1
 
 echo
 echo "========= Finished adding Org3 to your first network! ========= "

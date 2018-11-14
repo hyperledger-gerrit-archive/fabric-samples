@@ -1,0 +1,9 @@
+{
+  "index":{
+      "fields":["typeOfObject", "bidder", "itemId"] 
+  },
+  "ddoc":"BidsForItemByBidderDoc", 
+  "name":"BidsForItemByBidder",
+  "type":"json"
+}
+

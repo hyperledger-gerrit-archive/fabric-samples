@@ -1,0 +1,9 @@
+{
+   "index": {
+      "fields": [
+         "bidAmount"
+      ]
+   },
+   "name": "bidAmount-json-index",
+   "type": "json"
+}
