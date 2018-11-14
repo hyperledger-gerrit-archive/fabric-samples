@@ -1,0 +1,32 @@
+{
+    "host":"localhost",
+    "port":"4000",
+    "jwt_expiretime": "36000",
+    "channelName":"mychannel",
+    "CC_SRC_PATH":"../../chaincode",
+    "chaincodeId":"mycc1",
+    "eventWaitTime":"30000",  
+    
+    "admins":[
+        {"Org1": {
+                "username":"admin",
+                "secret":"adminpw",
+                "affiliation":"org1.department1",
+                "attributesForRegister": [{ "name": "role", "value": "seller", "Ecert": true }],
+                "attributesForEnroll": [{ "name": "role", "optional": false }],
+                "peers": ["peer0.org1.example.com"]
+            }
+        ,"Org2":
+            {
+                "username":"admin",
+                "secret":"adminpw",
+                "affiliation":"org2.department1",
+                "attributesForRegister": [{ "name": "role", "value": "buyer", "Ecert": true }],
+                "attributesForEnroll": [{ "name": "role", "optional": false }],
+                "peers": ["peer0.org2.example.com"]
+            }
+        }
+    ]  
+ }
+ 
+ 
