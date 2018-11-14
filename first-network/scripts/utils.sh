@@ -113,13 +113,17 @@ joinChannelWithRetry() {
   verifyResult $res "After $MAX_RETRY attempts, peer${PEER}.org${ORG} has failed to join channel '$CHANNEL_NAME' "
 }
 
+# installChaincode takes 4 parameters:
+#  Peer#, Org#, chaincode-version(optional), chaincode name(optional)
 installChaincode() {
   PEER=$1
   ORG=$2
   setGlobals $PEER $ORG
+
   VERSION=${3:-1.0}
+  CC_NAME=${4:-mycc}
   set -x
-  peer chaincode install -n mycc -v ${VERSION} -l ${LANGUAGE} -p ${CC_SRC_PATH} >&log.txt
+  peer chaincode install -n ${CC_NAME} -v ${VERSION} -l ${LANGUAGE} -p ${CC_SRC_PATH} >&log.txt
   res=$?
   set +x
   cat log.txt
@@ -128,23 +132,37 @@ installChaincode() {
   echo
 }
 
+#instantiateChaincode takes 6 parameters:
+#  Peer#, Org#, chaincode-version(optional), chaincode name(optional),
+#  endorsement policy - AND/OR(optional),path-to-collection-policy(optional)
 instantiateChaincode() {
   PEER=$1
   ORG=$2
   setGlobals $PEER $ORG
+
   VERSION=${3:-1.0}
+  CC_NAME=${4:-mycc}
+  EP=${5:-AND}
+  COL_POL=${6:-}
+
+  # collections-config is required for Private-Data feature in HLF v1.2+
+  if [ -n "$COL_POL" ]; then
+    COL_POL_OPT="--collections-config ${COL_POL}"
+  else
+    COL_POL_OPT=""
+  fi
 
   # while 'peer chaincode' command can get the orderer endpoint from the peer
   # (if join was successful), let's supply it directly as we know it using
   # the "-o" option
   if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then
     set -x
-    peer chaincode instantiate -o orderer.example.com:7050 -C $CHANNEL_NAME -n mycc -l ${LANGUAGE} -v ${VERSION} -c '{"Args":["init","a","100","b","200"]}' -P "AND ('Org1MSP.peer','Org2MSP.peer')" >&log.txt
+    peer chaincode instantiate -o orderer.example.com:7050 -C $CHANNEL_NAME -n ${CC_NAME} -l ${LANGUAGE} -v ${VERSION} -c '{"Args":["init","a","100","b","200"]}' -P "${EP} ('Org1MSP.peer','Org2MSP.peer')"  ${COL_POL_OPT} >&log.txt
     res=$?
     set +x
   else
     set -x
-    peer chaincode instantiate -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc -l ${LANGUAGE} -v 1.0 -c '{"Args":["init","a","100","b","200"]}' -P "AND ('Org1MSP.peer','Org2MSP.peer')" >&log.txt
+    peer chaincode instantiate -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} -l ${LANGUAGE} -v ${VERSION} -c '{"Args":["init","a","100","b","200"]}' -P "${EP} ('Org1MSP.peer','Org2MSP.peer')"  ${COL_POL_OPT} >&log.txt
     res=$?
     set +x
   fi
@@ -154,13 +172,53 @@ instantiateChaincode() {
   echo
 }
 
+#upgradeChaincode takes 6 parameters:
+#  Peer#, Org#, chaincode-version(optional), chaincode name(optional),
+#  endorsement policy - AND/OR(optional),path-to-collection-policy(optional)
 upgradeChaincode() {
   PEER=$1
   ORG=$2
   setGlobals $PEER $ORG
 
+  VERSION=${3:-2.0}
+  CC_NAME=${4:-mycc}
+  EP=${5:-AND}
+  COL_POL=${6:-}
+
+  if [ -n "$COL_POL" ]; then
+    COL_POL_OPT=--collections-config $COL_POL
+  fi
+
   set -x
-  peer chaincode upgrade -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc -v 2.0 -c '{"Args":["init","a","90","b","210"]}' -P "AND ('Org1MSP.peer','Org2MSP.peer','Org3MSP.peer')"
+  peer chaincode upgrade -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} -v ${VERSION} -c '{"Args":["init","a","90","b","210"]}' -P "${EP}('Org1MSP.peer','Org2MSP.peer')" ${COL_POL_OPT}
+  res=$?
+  set +x
+  cat log.txt
+  verifyResult $res "Chaincode upgrade on peer${PEER}.org${ORG} has failed"
+  echo "===================== Chaincode is upgraded on peer${PEER}.org${ORG} on channel '$CHANNEL_NAME' ===================== "
+  echo
+}
+
+#upgradeChaincodeToAddOr takes 6 parameters: 
+# Peer#, Org#, chaincode-version(optional), chaincode name(optional), 
+# endorsement policy - AND/OR(optional),path-to-collection-policy(optional)
+#used while adding Org3
+upgradeChaincodeToAddOrg() {
+  PEER=$1
+  ORG=$2
+  setGlobals $PEER $ORG
+
+  VERSION=${3:-2.0}
+  CC_NAME=${4:-mycc}
+  EP=${5:-AND}
+  COL_POL=${6:-}
+
+  if [ -n "$COL_POL" ]; then
+    COL_POL_OPT=--collections-config $COL_POL
+  fi
+
+  set -x
+  peer chaincode upgrade -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} -v ${VERSION} -c '{"Args":["init","a","90","b","210"]}' -P "${EP}('Org1MSP.peer','Org2MSP.peer','Org3MSP.peer')" ${COL_POL_OPT}
   res=$?
   set +x
   cat log.txt
