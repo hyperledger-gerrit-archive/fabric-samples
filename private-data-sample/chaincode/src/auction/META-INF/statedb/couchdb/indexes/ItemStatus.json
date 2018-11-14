@@ -1,0 +1,9 @@
+{
+  "index":{
+      "fields":["typeOfObject", "status"] 
+  },
+  "ddoc":"ItemStatusDoc", 
+  "name":"ItemStatus",
+  "type":"json"
+}
+

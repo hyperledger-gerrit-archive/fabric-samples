@@ -1,0 +1,35 @@
+{
+  "name": "hf_sdk_node_wrapper",
+  "version": "1.0.0",
+  "description": "Wrapper for Hyeprledger Fabric SDK",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "tslint": "tslint -c tslint.json -p tsconfig.json",
+    "prestart": "npm run build",
+    "start": "node dist/index.js",
+    "pretest": "npm run build",
+    "test": "mocha -r ts-node/register test/index.spec.ts --timeout 20000"
+  },
+  "keywords": [
+    "Hyperledger",
+    "Fabric",
+    "SDK"
+  ],
+  "author": "Blockchain R&D @ Persistent",
+  "devDependencies": {
+    "@types/chai": "^4.1.0",
+    "@types/mocha": "^2.2.46",
+    "@types/node": "^9.6.26",
+    "chai": "^4.1.2",
+    "mocha": "^4.1.0",
+    "ts-node": "^4.0.1",
+    "tslint": "^5.9.1",
+    "typescript": "^2.6.2"
+  },
+  "dependencies": {
+    "@types/bytebuffer": "^5.0.37",
+    "fabric-ca-client": "1.3.0",
+    "fabric-client": "1.3.0"
+  }
+}
