@@ -105,6 +105,23 @@ node ('hyp-x') { // trigger build on x86_64 node
            }
          }
       }
+
+      // Run fabcar tests
+      stage("Run FabCar Tests") {
+         // making the output color coded
+         wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+           try {
+                 dir("${ROOTDIR}/$PROJECT_DIR/fabric-samples/scripts/Jenkins_Scripts") {
+                 sh './CI_Script.sh --fabcar_Tests'
+                 }
+               }
+           catch (err) {
+                 failure_stage = "fabcar_Tests"
+                 currentBuild.result = 'FAILURE'
+                 throw err
+           }
+         }
+      }
       } finally {
            // Archive the artifacts
            archiveArtifacts allowEmptyArchive: true, artifacts: '**/*.log'
