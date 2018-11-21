@@ -29,8 +29,11 @@ Parse_Arguments() {
                       --clean_Environment)
                             clean_Environment
                             ;;
-		      --byfn_eyfn_Tests)
+                      --byfn_eyfn_Tests)
                             byfn_eyfn_Tests
+                            ;;
+                      --fabcar_Tests)
+                            fabcar_Tests
                             ;;
                       --pull_Thirdparty_Images)
                             pull_Thirdparty_Images
@@ -157,5 +160,11 @@ byfn_eyfn_Tests() {
 	echo
 	echo "-----------> Execute Byfn and Eyfn Tests"
 	./byfn_eyfn.sh
+}
+# run fabcar tests
+fabcar_Tests() {
+	echo
+	echo "-----------> Execute FabCar Tests"
+	./fabcar.sh
 }
 Parse_Arguments $@
