@@ -10,6 +10,7 @@
 export BASE_FOLDER=$WORKSPACE/gopath/src/github.com/hyperledger
 export NEXUS_URL=nexus3.hyperledger.org:10001
 export ORG_NAME="hyperledger/fabric"
+export NODE_VER=8.9.4 # Default nodejs version
 
 Parse_Arguments() {
       while [ $# -gt 0 ]; do
@@ -29,8 +30,11 @@ Parse_Arguments() {
                       --clean_Environment)
                             clean_Environment
                             ;;
-		      --byfn_eyfn_Tests)
+                      --byfn_eyfn_Tests)
                             byfn_eyfn_Tests
+                            ;;
+                      --fabcar_Tests)
+                            fabcar_Tests
                             ;;
                       --pull_Thirdparty_Images)
                             pull_Thirdparty_Images
@@ -152,10 +156,36 @@ pull_Fabric_CA_Image() {
                  echo
                  docker images | grep hyperledger/fabric-ca
 }
+# install nvm, node.js, and npm
+install_nodejs() {
+      # Install nvm to install multi node versions
+      wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash
+      # shellcheck source=/dev/null
+      export NVM_DIR="$HOME/.nvm"
+      # shellcheck source=/dev/null
+      [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+      echo "------> Install NodeJS"
+      # This also depends on the fabric-baseimage. Make sure you modify there as well.
+      echo "------> Use $NODE_VER for >=release-1.1 branches"
+      nvm install $NODE_VER || true
+      # use nodejs 8.9.4 version
+      nvm use --delete-prefix v$NODE_VER --silent
+
+      echo "npm version ------> $(npm -v)"
+      echo "node version ------> $(node -v)"
+      echo "npm install ------> starting"
+}
 # run byfn,eyfn tests
 byfn_eyfn_Tests() {
 	echo
 	echo "-----------> Execute Byfn and Eyfn Tests"
 	./byfn_eyfn.sh
+}
+# run fabcar tests
+fabcar_Tests() {
+	echo
+	echo "-----------> Execute FabCar Tests"
+      install_nodejs
+	./fabcar.sh
 }
 Parse_Arguments $@
