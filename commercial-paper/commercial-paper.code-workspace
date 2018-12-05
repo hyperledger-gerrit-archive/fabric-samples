@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "/home/matthew/fabric-application-examples"
+		}
+	],
+	"settings": {
+		"git.ignoreLimitWarning": true
+	}
+}
