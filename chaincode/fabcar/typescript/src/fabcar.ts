@@ -2,11 +2,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Context, Contract } from 'fabric-contract-api';
+import { Context, Contract,  Info, Returns , Transaction } from 'fabric-contract-api';
 import { Car } from './car';
 
+@Info({name: 'FabCar', version: '1.1.1', description: 'Fabcar example'})
 export class FabCar extends Contract {
 
+    public constructor() {
+        super('');
+    }
+
+    @Transaction()
     public async initLedger(ctx: Context) {
         console.info('============= START : Initialize Ledger ===========');
         const cars: Car[] = [
@@ -80,6 +86,8 @@ export class FabCar extends Contract {
         console.info('============= END : Initialize Ledger ===========');
     }
 
+    @Transaction(false)
+    @Returns('string')
     public async queryCar(ctx: Context, carNumber: string): Promise<string> {
         const carAsBytes = await ctx.stub.getState(carNumber); // get the car from chaincode state
         if (!carAsBytes || carAsBytes.length === 0) {
@@ -89,6 +97,7 @@ export class FabCar extends Contract {
         return carAsBytes.toString();
     }
 
+    @Transaction()
     public async createCar(ctx: Context, carNumber: string, make: string, model: string, color: string, owner: string) {
         console.info('============= START : Create Car ===========');
 
@@ -104,6 +113,7 @@ export class FabCar extends Contract {
         console.info('============= END : Create Car ===========');
     }
 
+    @Transaction()
     public async queryAllCars(ctx: Context): Promise<string> {
         const startKey = 'CAR0';
         const endKey = 'CAR999';
@@ -136,6 +146,7 @@ export class FabCar extends Contract {
         }
     }
 
+    @Transaction()
     public async changeCarOwner(ctx: Context, carNumber: string, newOwner: string) {
         console.info('============= START : changeCarOwner ===========');
 

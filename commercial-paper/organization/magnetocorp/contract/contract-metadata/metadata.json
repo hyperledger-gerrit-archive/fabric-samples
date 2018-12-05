@@ -1,0 +1,127 @@
+{
+    "$schema": "https://fabric-shim.github.io/contract-schema.json",
+    "info": {
+        "title": "Papernet - Commercial Paper Trading",
+        "description": "Commercial Paper Trading",
+        "termsOfService": "https://hyperledger-fabric.readthedocs.io/en/master/developapps/scenario.html",
+        "contact": {
+            "name": "API Support",
+            "url": "https://github.com/hyperledger/fabric-samples/tree/master/commercial-paper",
+            "email": "support@example.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0.1"
+    },
+    "contracts": {
+        "org.papernet.commercialpaper": {
+            "name": "org.papernet.commercialpaper",
+            "transactions": [
+                {
+                    "name": "instantiate",
+                    "tag": [
+                        "submitTx"
+                    ],
+                    "parameters": []
+                },
+                {
+                    "name": "addCommodity",
+                    "tag": [
+                        "submitTx"
+                    ],
+                    "parameters": [
+                        {
+                            "name": "commodity",
+                            "description": "",
+                            "schema": {
+                                "$ref": "#/components/schemas/Commodity"
+                            }
+                        }
+                    ],
+                    "returns": {
+                        "name": "commodity",
+                        "schema": {
+                            "$ref": "#/components/schemas/Commodity"
+                        }
+                    }
+                },
+                {
+                    "name": "tradeCommodity",
+                    "tag": [
+                        "submitTx"
+                    ],
+                    "parameters": [
+                        {
+                            "name": "tradingSymbol",
+                            "description": "",
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "tradeId",
+                            "description": "",
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "newOwner",
+                            "description": "",
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    ],
+                    "returns": {
+                        "name": "commodity",
+                        "schema": {
+                            "$ref": "#/components/schemas/Commodity"
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    "components": {
+        "schemas": {
+            "Commodity": {
+                "$id": "Commodity",
+                "properties": [
+                    {
+                        "name": "tradeId",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "tradingSymbol",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "description",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "quantity",
+                        "schema": {
+                            "type": "number"
+                        }
+                    },
+                    {
+                        "name": "owner",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}

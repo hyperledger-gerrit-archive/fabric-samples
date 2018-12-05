@@ -79,3 +79,5 @@ typings/
 # Compiled TypeScript files
 dist
 
+# Don't want to lock people to the versions as this a cross version sample
+pacakge-lock.json
