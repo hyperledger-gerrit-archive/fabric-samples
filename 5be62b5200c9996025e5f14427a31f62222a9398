@@ -1,0 +1,9 @@
+Code-Review+1: Anthony O'Dowd <a_o-dowd@uk.ibm.com>
+Verified+1: Hyperledger Jobbuilder <jobbuilder@jenkins.hyperledger.org>
+Code-Review+2: David Enyeart <enyeart@us.ibm.com>
+Code-Review+2: Christopher Ferris <chris.ferris@gmail.com>
+Submitted-by: Christopher Ferris <chris.ferris@gmail.com>
+Submitted-at: Mon, 10 Dec 2018 15:55:50 +0000
+Reviewed-on: https://gerrit.hyperledger.org/r/28035
+Project: fabric-samples
+Branch: refs/heads/master
