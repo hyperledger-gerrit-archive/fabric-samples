@@ -30,15 +30,21 @@ an older released version, or from locally built docker images as follows:
     `FABRIC_TAG` environment variable. For example, `export FABRIC_TAG=1.4.0-rc1`
     will run the sample with 1.4.0-rc1 version of Fabric and Fabric CA.
 
-    c. The sample can also be run with locally built Fabric and Fabric CA
-    docker images. Fabric and Fabric CA repositories must be cloned with following
-    commands:
+    c. The sample can also be executed using locally built Fabric CA docker
+    images. The Fabric CA repository must be cloned with following command:
 
-    `git clone https://github.com/hyperledger/fabric.git`
     `git clone https://github.com/hyperledger/fabric-ca.git`
 
-    Then execute the `make docker-all` command from the fabric-ca repository. This will
-    build the necessary images based on the local source code. Before executing the
+    A couple of the Fabric CA images are built with Fabric peer and Fabric
+    orderer docker images as the base images. The Fabric docker images may be
+    pulled from Nexus or DockerHub or they may be built from a local Fabric
+    repository. The Fabric repository can be cloned with the following command:
+
+    `git clone https://github.com/hyperledger/fabric.git`
+
+    After the Fabric docker images are on the local system, execute the
+    `make docker-all` command from the fabric-ca repository. This will build
+    the necessary images based on the local source code. Before executing the
     *start.sh* script, set the `FABRIC_TAG` environment variable to 'local' as follows:
     `export FABRIC_TAG=local`.
 
