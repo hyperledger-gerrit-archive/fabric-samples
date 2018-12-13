@@ -5,11 +5,24 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 # Exit on first error
+
+function clearContainers(){
+        CONTAINER_IDS=$(docker ps -aq)
+	echo
+        if [ -z "$CONTAINER_IDS" -o "$CONTAINER_IDS" = " " ]; then
+                echo "========== No containers available for deletion =========="
+        else
+                docker rm -f $CONTAINER_IDS
+        fi
+	echo
+}
+
 set -e
 
 # don't rewrite paths for Windows Git Bash users
 export MSYS_NO_PATHCONV=1
 starttime=$(date +%s)
+clearContainers
 CC_SRC_LANGUAGE=${1:-"go"}
 CC_SRC_LANGUAGE=`echo "$CC_SRC_LANGUAGE" | tr [:upper:] [:lower:]`
 if [ "$CC_SRC_LANGUAGE" = "go" -o "$CC_SRC_LANGUAGE" = "golang"  ]; then
