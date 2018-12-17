@@ -3,13 +3,14 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// Pipeline script for fabric-samples
+// Pipeline script for fabric-samples release-1.3
 
+timeout(40) {
 node ('hyp-x') { // trigger build on x86_64 node
   timestamps {
    try {
     def ROOTDIR = pwd() // workspace dir (/w/workspace/<job_name>
-    env.NODE_VER = "8.11.3" // NodeJs version
+    def nodeHome = tool 'nodejs-8.11.3'
     env.OS_VER = "amd64"
     env.VERSION = sh(returnStdout: true, script: 'curl -O https://raw.githubusercontent.com/hyperledger/fabric/release-1.3/Makefile && cat Makefile | grep "PREV_VERSION =" | cut -d "=" -f2').trim()
     env.VERSION = "$VERSION"
@@ -17,18 +18,38 @@ node ('hyp-x') { // trigger build on x86_64 node
     env.BASE_IMAGE_TAG = "${OS_VER}-${BASE_IMAGE_VER}"
     env.PROJECT_DIR = "gopath/src/github.com/hyperledger"
     env.GOPATH = "$WORKSPACE/gopath"
-    env.PATH = "$GOPATH/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:~/npm/bin:/home/jenkins/.nvm/versions/node/v${NODE_VER}/bin:$PATH"
+    def jobname = sh(returnStdout: true, script: 'echo ${JOB_NAME} | grep -q "verify" && echo patchset || echo merge').trim()
+    env.PATH = "$GOPATH/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:${nodeHome}/bin:$PATH"
+
     def failure_stage = "none"
     // delete working directory
     deleteDir()
-      stage("Fetch Patchset") { // fetch gerrit refspec on latest commit
+      stage("Fetch Patchset") {
+      cleanWs()
           try {
-              dir("${ROOTDIR}") {
+             if (jobname == 'patchset') {
+                   println "$GERRIT_REFSPEC"
+                   println "$GERRIT_BRANCH"
+                   checkout([
+                       $class: 'GitSCM',
+                       branches: [[name: '$GERRIT_REFSPEC']],
+                       extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'gopath/src/github.com/hyperledger/$PROJECT'], [$class: 'CheckoutOption', timeout: 10]],
+                       userRemoteConfigs: [[credentialsId: 'hyperledger-jobbuilder', name: 'origin', refspec: '$GERRIT_REFSPEC:$GERRIT_REFSPEC', url: '$GIT_BASE']]])
+              } else {
+                   // Clone fabric-samples on merge
+                   println "Clone $PROJECT repository"
+                   checkout([
+                       $class: 'GitSCM',
+                       branches: [[name: 'refs/heads/$GERRIT_BRANCH']],
+                       extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'gopath/src/github.com/hyperledger/$PROJECT']],
+                       userRemoteConfigs: [[credentialsId: 'hyperledger-jobbuilder', name: 'origin', refspec: '+refs/heads/$GERRIT_BRANCH:refs/remotes/origin/$GERRIT_BRANCH', url: '$GIT_BASE']]])
+              }
+              dir("${ROOTDIR}/$PROJECT_DIR/$PROJECT") {
               sh '''
-                 [ -e gopath/src/github.com/hyperledger/fabric-samples ] || mkdir -p $PROJECT_DIR
-                 cd $PROJECT_DIR
-                 git clone git://cloud.hyperledger.org/mirror/fabric-samples && cd fabric-samples
-                 git fetch origin "$GERRIT_REFSPEC" && git checkout FETCH_HEAD
+                 # Print last two commit details
+                 echo
+                 git log -n2 --pretty=oneline --abbrev-commit
+                 echo
               '''
               }
           }
@@ -106,13 +127,12 @@ node ('hyp-x') { // trigger build on x86_64 node
            // Archive the artifacts
            archiveArtifacts allowEmptyArchive: true, artifacts: '**/*.log'
            // Sends notification to Rocket.Chat jenkins-robot channel
-           if (env.GERRIT_EVENT_TYPE == 'change-merged') {
+           if (env.JOB_NAME == "fabric-samples-merge-byfn") {
               if (currentBuild.result == 'FAILURE') { // Other values: SUCCESS, UNSTABLE
-               rocketSend channel: 'jenkins-robot', message: "Build Notification - STATUS: ${currentBuild.result} - BRANCH: ${env.GERRIT_BRANCH} - PROJECT: ${env.PROJECT} - (<${env.BUILD_URL}|Open>)"
+               rocketSend message: "Build Notification - STATUS: *${currentBuild.result}* - BRANCH: *${env.GERRIT_BRANCH}* - PROJECT: *${env.PROJECT}* - (<${env.BUILD_URL}|Open>)"
               }
            }
         }
-// End Try block
-  }
-// End Node block
-}
+  } // end try
+} // end node
+} // end timeouts
