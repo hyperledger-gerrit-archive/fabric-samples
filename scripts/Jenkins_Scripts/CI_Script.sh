@@ -125,6 +125,7 @@ pull_Docker_Images() {
                  fi
                  docker tag $NEXUS_URL/$ORG_NAME-$IMAGES:$IMAGE_TAG $ORG_NAME-$IMAGES
                  docker tag $NEXUS_URL/$ORG_NAME-$IMAGES:$IMAGE_TAG $ORG_NAME-$IMAGES:$ARCH-$VERSION
+                 docker tag $NEXUS_URL/$ORG_NAME-$IMAGES:$IMAGE_TAG $ORG_NAME-$IMAGES:$VERSION
                  docker rmi -f $NEXUS_URL/$ORG_NAME-$IMAGES:$IMAGE_TAG
             done
                  echo
