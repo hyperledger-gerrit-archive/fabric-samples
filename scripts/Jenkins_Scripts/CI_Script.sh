@@ -96,10 +96,10 @@ env_Info() {
 	pgrep -a docker
 }
 
-# Pull Thirdparty Docker images (Kafka, couchdb, zookeeper)
+# Pull Thirdparty Docker images (kafka, couchdb, zookeeper baseos)
 pull_Thirdparty_Images() {
             echo "------> BASE_IMAGE_TAG:" $BASE_IMAGE_TAG
-            for IMAGES in kafka couchdb zookeeper; do
+            for IMAGES in kafka couchdb zookeeper baseos; do
                  echo "-----------> Pull $IMAGES image"
                  echo
                  docker pull $ORG_NAME-$IMAGES:${BASE_IMAGE_TAG} > /dev/null 2>&1
@@ -108,6 +108,7 @@ pull_Thirdparty_Images() {
                        exit 1
                  fi
                  docker tag $ORG_NAME-$IMAGES:${BASE_IMAGE_TAG} $ORG_NAME-$IMAGES
+                 docker tag $ORG_NAME-$IMAGES:${BASE_IMAGE_TAG} $ORG_NAME-$IMAGES:$VERSION
             done
                  echo
                  docker images | grep hyperledger/fabric
@@ -115,7 +116,7 @@ pull_Thirdparty_Images() {
 # pull fabric images from nexus
 pull_Docker_Images() {
             pull_Fabric_CA_Image
-            for IMAGES in peer orderer tools ccenv; do
+            for IMAGES in peer orderer tools ccenv nodeenv; do
                  echo "-----------> pull $IMAGES image"
                  echo
                  docker pull $NEXUS_URL/$ORG_NAME-$IMAGES:$IMAGE_TAG > /dev/null 2>&1
@@ -125,6 +126,7 @@ pull_Docker_Images() {
                  fi
                  docker tag $NEXUS_URL/$ORG_NAME-$IMAGES:$IMAGE_TAG $ORG_NAME-$IMAGES
                  docker tag $NEXUS_URL/$ORG_NAME-$IMAGES:$IMAGE_TAG $ORG_NAME-$IMAGES:$ARCH-$VERSION
+                 docker tag $NEXUS_URL/$ORG_NAME-$IMAGES:$IMAGE_TAG $ORG_NAME-$IMAGES:$VERSION
                  docker rmi -f $NEXUS_URL/$ORG_NAME-$IMAGES:$IMAGE_TAG
             done
                  echo
