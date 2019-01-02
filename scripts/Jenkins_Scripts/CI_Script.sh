@@ -142,7 +142,8 @@ pull_Fabric_CA_Image() {
                        exit 1
                  fi
                  docker tag $NEXUS_URL/$ORG_NAME-$IMAGES:$IMAGE_TAG $ORG_NAME-$IMAGES
-	         docker tag $NEXUS_URL/$ORG_NAME-$IMAGES:$IMAGE_TAG $ORG_NAME-$IMAGES:$ARCH-$VERSION
+	           docker tag $NEXUS_URL/$ORG_NAME-$IMAGES:$IMAGE_TAG $ORG_NAME-$IMAGES:$ARCH-$VERSION
+                 docker tag $NEXUS_URL/$ORG_NAME-$IMAGES:$IMAGE_TAG $ORG_NAME-$IMAGES:$VERSION
                  docker rmi -f $NEXUS_URL/$ORG_NAME-$IMAGES:$IMAGE_TAG
             done
                  echo
