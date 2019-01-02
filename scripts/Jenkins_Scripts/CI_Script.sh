@@ -133,7 +133,7 @@ pull_Docker_Images() {
 # pull fabric-ca images from nexus
 pull_Fabric_CA_Image() {
             echo "------> IMAGE_TAG:" $IMAGE_TAG
-            for IMAGES in ca ca-peer ca-orderer ca-tools; do
+            for IMAGES in ca; do
                  echo "-----------> pull $IMAGES image"
                  echo
                  docker pull $NEXUS_URL/$ORG_NAME-$IMAGES:$IMAGE_TAG > /dev/null 2>&1
@@ -142,7 +142,8 @@ pull_Fabric_CA_Image() {
                        exit 1
                  fi
                  docker tag $NEXUS_URL/$ORG_NAME-$IMAGES:$IMAGE_TAG $ORG_NAME-$IMAGES
-	         docker tag $NEXUS_URL/$ORG_NAME-$IMAGES:$IMAGE_TAG $ORG_NAME-$IMAGES:$ARCH-$VERSION
+	           docker tag $NEXUS_URL/$ORG_NAME-$IMAGES:$IMAGE_TAG $ORG_NAME-$IMAGES:$ARCH-$VERSION
+                 docker tag $NEXUS_URL/$ORG_NAME-$IMAGES:$IMAGE_TAG $ORG_NAME-$IMAGES:$VERSION
                  docker rmi -f $NEXUS_URL/$ORG_NAME-$IMAGES:$IMAGE_TAG
             done
                  echo
