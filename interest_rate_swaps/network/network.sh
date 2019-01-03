@@ -182,6 +182,16 @@ function generateChannelArtifacts() {
     echo "Failed to generate channel configuration transaction..."
     exit 1
   fi
+  echo "### Generating channel anchor peer update transaction 'anchors.tx' ###"
+  for org in partya partyb partyc auditor rrprovider
+  do
+    configtxgen -profile IRSChannel -outputAnchorPeersUpdate ./channel-artifacts/${org}anchors.tx -channelID $CHANNEL_NAME -asOrg $org
+    res=$?
+    if [ $res -ne 0 ]; then
+      echo "Failed to generate channel anchor peer update transaction..."
+      exit 1
+    fi
+  done
 }
 
 # Obtain the OS and Architecture string that will be used to select the correct

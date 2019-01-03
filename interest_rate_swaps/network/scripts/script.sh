@@ -5,6 +5,7 @@ TIMEOUT="10"
 VERBOSE="false"
 COUNTER=1
 MAX_RETRY=5
+ENDORSER_ENDPOINTS=""
 
 CC_SRC_PATH="irscc/"
 
@@ -50,6 +51,18 @@ instantiateChaincode() {
 	echo "===================== Chaincode instantiated ===================== "
 }
 
+updateAnchorPeers() {
+	for org in partya partyb partyc auditor rrprovider
+	do
+		CORE_PEER_LOCALMSPID=$org
+		CORE_PEER_ADDRESS=irs-$org:7051
+		CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/$org.example.com/users/Admin@$org.example.com/msp
+		echo "===================== $org anchor peer update ===================== "
+		peer channel update -o irs-orderer:7050 -c irs -f ./channel-artifacts/${CORE_PEER_LOCALMSPID}anchors.tx
+		echo "===================== Anchor peers updated for $org ===================== "
+	done
+}
+
 setReferenceRate() {
 	CORE_PEER_LOCALMSPID=rrprovider
 	CORE_PEER_ADDRESS=irs-rrprovider:7051
@@ -68,12 +81,35 @@ createSwap() {
 	echo "===================== Chaincode invoked ===================== "
 }
 
+getEndorsers() {
+	CORE_PEER_LOCALMSPID=partya
+	CORE_PEER_ADDRESS=irs-partya:7051
+	CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/partya.example.com/users/User1@partya.example.com/msp
+	echo "===================== Invoking chaincode ===================== "
+	ENDORSER_JSON=$(peer chaincode query -o irs-orderer:7050 -C irs -n irscc -c '{"Args":["getSwapEndorsers","myswap"]}')
+	echo "===================== Chaincode invoked ===================== "
+	echo "===================== Discovering peers ===================== "
+	PEERS=$(discover --MSP $CORE_PEER_LOCALMSPID --userKey $CORE_PEER_MSPCONFIGPATH/keystore/* --userCert $CORE_PEER_MSPCONFIGPATH/signcerts/User1@partya.example.com-cert.pem peers --channel irs  --server irs-partya:7051)
+	echo "===================== Peers discovered ===================== "
+	peer_map=$(echo $PEERS | jq '.[] | with_entries(if .key == "MSPID" then .key = "key" else . end) | with_entries(if .key == "Endpoint" then .key = "value" else . end) | [.] | from_entries' | jq -s 'add')
+	NUM_ENDORSERS=$(echo $ENDORSER_JSON | jq '. | length')
+	echo "Number of endorsers:" $NUM_ENDORSERS
+	for ((i=0;i<NUM_ENDORSERS;i++))
+	do
+		ENDORSER_MSPID=$(echo $ENDORSER_JSON | jq '.['"$i"']')
+		endpoint=$(echo $peer_map | jq '.'"$ENDORSER_MSPID"'')
+		echo "Endorser organization" $ENDORSER_MSPID "with endpoint" $endpoint
+		ENDORSER_ENDPOINTS=$(echo $ENDORSER_ENDPOINTS "--peerAddresses " $endpoint " ")
+	done
+	echo "Endpoint options set:" $ENDORSER_ENDPOINTS
+}
+
 calculatePayment() {
 	CORE_PEER_LOCALMSPID=partya
 	CORE_PEER_ADDRESS=irs-partya:7051
 	CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/partya.example.com/users/User1@partya.example.com/msp
 	echo "===================== Invoking chaincode ===================== "
-	peer chaincode invoke -o irs-orderer:7050 -C irs --waitForEvent -n irscc --peerAddresses irs-partya:7051 --peerAddresses irs-partyb:7051 -c '{"Args":["calculatePayment","myswap"]}'
+	peer chaincode invoke -o irs-orderer:7050 -C irs --waitForEvent -n irscc $ENDORSER_ENDPOINTS -c '{"Args":["calculatePayment","myswap"]}'
 	echo "===================== Chaincode invoked ===================== "
 }
 
@@ -82,7 +118,7 @@ settlePayment() {
 	CORE_PEER_ADDRESS=irs-partyb:7051
 	CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/partyb.example.com/users/User1@partyb.example.com/msp
 	echo "===================== Invoking chaincode ===================== "
-	peer chaincode invoke -o irs-orderer:7050 -C irs --waitForEvent -n irscc --peerAddresses irs-partya:7051 --peerAddresses irs-partyb:7051 -c '{"Args":["settlePayment","myswap"]}'
+	peer chaincode invoke -o irs-orderer:7050 -C irs --waitForEvent -n irscc $ENDORSER_ENDPOINTS -c '{"Args":["settlePayment","myswap"]}'
 	echo "===================== Chaincode invoked ===================== "
 }
 
@@ -94,6 +130,10 @@ createChannel
 ## Join all the peers to the channel
 echo "Having all peers join the channel..."
 joinChannel
+
+## Updating anchor peers
+echo "Updating channel anchor peers..."
+updateAnchorPeers
 
 ## Install chaincode on all peers
 echo "Installing chaincode..."
@@ -109,6 +149,9 @@ setReferenceRate
 
 echo "Creating swap between A and B"
 createSwap
+
+echo "Retrieving swap endorsers"
+getEndorsers
 
 echo "Calculate payment information"
 calculatePayment

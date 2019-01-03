@@ -43,6 +43,7 @@ It provides the following functions:
 -) calculatePayment: calculate what needs to be paid
 -) settlePayment: mark payment done
 -) setReferenceRate: for providers to set the reference rate
+-) getSwapEndorsers: return MSP IDs of orgs that need to endorse a swap
 
 The SwapManager stores three different kinds of information on the ledger:
 -) the actual swap data ("swap" + ID)
@@ -125,6 +126,7 @@ var functions = map[string]func(stub shim.ChaincodeStubInterface) pb.Response{
 	"calculatePayment": calculatePayment,
 	"settlePayment":    settlePayment,
 	"setReferenceRate": setReferenceRate,
+	"getSwapEndorsers": getSwapEndorsers,
 }
 
 // Create a new swap among participants.
@@ -303,6 +305,33 @@ func setReferenceRate(stub shim.ChaincodeStubInterface) pb.Response {
 		return shim.Error(err.Error())
 	}
 	return shim.Success([]byte{})
+}
+
+// getSwapEndorsers returns the MSP IDs of the orgs that need to endorse a given swap
+func getSwapEndorsers(stub shim.ChaincodeStubInterface) pb.Response {
+	_, parameters := stub.GetFunctionAndParameters()
+	if len(parameters) != 1 {
+		return shim.Error("Wrong number of arguments supplied. Expected: <swap_ID>")
+	}
+	swapID := "swap" + parameters[0]
+	epBytes, err := stub.GetStateValidationParameter(swapID)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	if epBytes == nil {
+		return shim.Error(fmt.Sprintf("Swap %s does not exist", parameters[0]))
+	}
+	ep, err := statebased.NewStateEP(epBytes)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	orgs := ep.ListOrgs()
+	jsonOrgs, err := json.Marshal(orgs)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	return shim.Success(jsonOrgs)
 }
 
 func main() {
