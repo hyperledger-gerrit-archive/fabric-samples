@@ -81,6 +81,11 @@ The interest-rate swap chaincode provides the following API:
  * `settlePayment(swapID)` - set the payment entry for the given swap ID to "none".
    This function is supposed to be invoked after the two parties have settled the
    payment off-chain.
+ * `getSwapEndorsers(swapID)` - retrieve the endorsers for a given swap. This
+   information is based on the key-level endorsement policy of the swap and will
+   always return the MSP IDs of the two parties that are participants to the swap
+   as well as the auditor, if the swap's principal amount is above the auditing
+   threshold.
  * `setReferenceRate(rrID, value)` - set a given reference rate to a given value.
  * `Init(auditor, threshold, rrProviders...)` - the chaincode namespace is initialized
    with a threshold for the principal amount above which a designated auditor
@@ -132,8 +137,9 @@ it sets the reference rate, creates a swap, calculates payment information for
 the swap and marks them as settled afterwards. We will show the corresponding
 commands in the following section.
 
-### Transactions
+### Transactions and Commands
 
+#### Instanting the chaincode
 The chaincode is instantiated as follows:
 ```
 peer chaincode instantiate -o irs-orderer:7050 -C irs -n irscc -l golang -v 0 -c '{"Args":["init","auditor","100000","rrprovider","myrr"]}' -P "AND(OR('partya.peer','partyb.peer','partyc.peer'), 'auditor.peer')"
@@ -142,13 +148,14 @@ This sets an auditing threshold of 1M, above which the `auditor` organization
 needs to be involved. It also specifies the `myrr` reference rate provided by
 the `rrprovider` organization.
 
-To set a reference rate:
+#### Setting a reference rate
 ```
 peer chaincode invoke -o irs-orderer:7050 -C irs --waitForEvent -n irscc --peerAddresses irs-rrprovider:7051 -c '{"Args":["setReferenceRate","myrr","3"]}'
 ```
 Note that the transaction is endorsed by a peer of the organization we have
 specified as providing this reference rate in the init parameters.
 
+#### Creating a swap
 To create a swap named "myswap":
 ```
 peer chaincode invoke -o irs-orderer:7050 -C irs --waitForEvent -n irscc --peerAddresses irs-partya:7051 --peerAddresses irs-partyb:7051 --peerAddresses irs-auditor:7051 -c '{"Args":["createSwap","myswap","{\"StartDate\":\"2018-09-27T15:04:05Z\",\"EndDate\":\"2018-09-30T15:04:05Z\",\"PaymentInterval\":365,\"PrincipalAmount\":10000000,\"FixedRate\":4,\"FloatingRate\":5,\"ReferenceRate\":\"myrr\"}", "partya", "partyb"]}'
@@ -158,6 +165,30 @@ swap as well as the auditor. Since the principal amount in this case is lower
 than the audit threshold we set as init parameters, no auditor will be required
 to endorse changes to the payment info or swap details.
 
+#### Retrieving endorser information
+After creating the swap, all subsequent transactions need to be endorsed by the
+organizations corresponding to the key-level endorsement policy of the swap.
+This includes at least the two parties that are part of the swap as well as the
+auditor if the principal amount of the swap is above the specified threshold.
+First, we retrieve the endorsers of the swap:
+```
+peer chaincode query -o irs-orderer:7050 -C irs -n irscc -c '{"Args":["getSwapEndorsers","myswap"]}'
+```
+Note that we are just querying the ledger here and do not create a new
+transaction. The query returns the MSP IDs of the organizations that are part of
+the key-level endorsement policy of this swap.
+
+We then use the [discovery service CLI](https://hyperledger-fabric.readthedocs.io/en/release-1.3/discovery-cli.html?highlight=service%20discovery#peer-membership-query)
+to obtain the endpoints of the anchor
+peers corresponding to those MSP IDs:
+```
+discover peers --channel irs  --server irs-partya:7051
+```
+This command returns information about all the anchor peers that are part of the
+`irs` channel. We subsequently use the `jq` tool to parse the JSON output of the
+disocver service and construct the command line parameters for the peer endpoints.
+
+#### Calculating payment information
 To calculate payment info for "myswap":
 ```
 peer chaincode invoke -o irs-orderer:7050 -C irs --waitForEvent -n irscc --peerAddresses irs-partya:7051 --peerAddresses irs-partyb:7051 -c '{"Args":["calculatePayment","myswap"]}'
@@ -165,6 +196,7 @@ peer chaincode invoke -o irs-orderer:7050 -C irs --waitForEvent -n irscc --peerA
 Note that we target only peers of
 party A and party B, since the swap is below the auditing threshold.
 
+#### Settling a payment
 To settle payment of "myswap":
 ```
 peer chaincode invoke -o irs-orderer:7050 -C irs --waitForEvent -n irscc `--peerAddresses irs-partya:7051 --peerAddresses irs-partyb:7051 -c '{"Args":["settlePayment","myswap"]}'
