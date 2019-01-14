@@ -104,9 +104,9 @@ and run some invocations are provided below.
   * In the `volumes` section of the `cli` container, edit the second line which refers to the chaincode folder to point to the chaincode folder
     within the `high-throughput` folder, e.g.
 
-    `./../chaincode/:/opt/gopath/src/github.com/hyperledger/fabric/examples/chaincode/go` --> 
-    `./../high-throughput/chaincode/:/opt/gopath/src/github.com/hyperledger/fabric/examples/chaincode/go`
-  * Again in the `volumes` section, edit the fourth line which refers to the scripts folder so it points to the scripts folder within the
+    `./../chaincode/:/opt/gopath/src/github.com/chaincode` --> 
+    `./../high-throughput/chaincode/:/opt/gopath/src/github.com/chaincode`
+  * Then, edit the fourth line which refers to the scripts folder so it points to the scripts folder within the
     `high-throughput` folder, e.g.
 
     `./scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/` --> 
@@ -117,7 +117,7 @@ and run some invocations are provided below.
     `#  docker exec cli scripts/script.sh $CHANNEL_NAME $CLI_DELAY $LANGUAGE $CLI_TIMEOUT $VERBOSE`
 
 3. We can now bring our network up by typing in `./byfn.sh -m up -c mychannel`
-4. Open a new terminal window and enter the CLI container using `docker exec -it cli bash`, all operations on the network will happen within
+4. Then, enter the CLI container using `docker exec -it cli bash`, all operations on the network will happen within
    this container from now on.
 
 ### Install and instantiate the chaincode
