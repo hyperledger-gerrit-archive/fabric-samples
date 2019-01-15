@@ -1,0 +1,9 @@
+Code-Review+1: Ramesh Babu <rameshbabu.thoomu@gmail.com>
+Verified+1: Hyperledger Jobbuilder <jobbuilder@jenkins.hyperledger.org>
+Code-Review+2: David Enyeart <enyeart@us.ibm.com>
+Code-Review+2: Jason Yellick <jyellick@us.ibm.com>
+Submitted-by: Jason Yellick <jyellick@us.ibm.com>
+Submitted-at: Tue, 15 Jan 2019 18:17:19 +0000
+Reviewed-on: https://gerrit.hyperledger.org/r/28571
+Project: fabric-samples
+Branch: refs/heads/release-1.4
