@@ -29,7 +29,7 @@ class StateList {
      * State object is serialized before writing.
      */
     async addState(state) {
-        let key = this.ctx.stub.createCompositeKey(this.name, state.getSplitKey());
+        let key = this.ctx.stub.createCompositeKey(this.name, state.getKeyParts());
         let data = State.serialize(state);
         await this.ctx.stub.putState(key, data);
     }
@@ -40,7 +40,7 @@ class StateList {
      * into JSON object before being returned.
      */
     async getState(key) {
-        let ledgerKey = this.ctx.stub.createCompositeKey(this.name, State.splitKey(key));
+        let ledgerKey = this.ctx.stub.createCompositeKey(this.name, state.getKeyParts());
         let data = await this.ctx.stub.getState(ledgerKey);
         let state = State.deserialize(data, this.supportedClasses);
         return state;
