@@ -48,7 +48,7 @@ function printHelp() {
   echo "    -f <docker-compose-file> - specify which docker-compose file use (defaults to docker-compose-cli.yaml)"
   echo "    -s <dbtype> - the database backend to use: goleveldb (default) or couchdb"
   echo "    -l <language> - the chaincode language: golang (default) or node"
-  echo "    -o <consensus-type> - the consensus-type of the ordering service: solo (default) or kafka"
+  echo "    -o <consensus-type> - the consensus-type of the ordering service: solo (default), kafka, or etcdraft"
   echo "    -i <imagetag> - the tag to be used to launch the network (defaults to \"latest\")"
   echo "    -v - verbose mode"
   echo "  byfn.sh -h (print this message)"
@@ -174,9 +174,9 @@ function networkUp() {
     exit 1
   fi
 
-  if [ "$CONSENSUS_TYPE" == "kafka" ]; then
+  if [ "$CONSENSUS_TYPE" == "kafka" ] || [ "$CONSENSUS_TYPE" == "etcdraft" ]; then
     sleep 1
-    echo "Sleeping 10s to allow kafka cluster to complete booting"
+    echo "Sleeping 10s to allow $CONSENSUS_TYPE cluster to complete booting"
     sleep 9
   fi
 
@@ -413,6 +413,8 @@ function generateChannelArtifacts() {
     configtxgen -profile TwoOrgsOrdererGenesis -channelID byfn-sys-channel -outputBlock ./channel-artifacts/genesis.block
   elif [ "$CONSENSUS_TYPE" == "kafka" ]; then
     configtxgen -profile SampleDevModeKafka -channelID byfn-sys-channel -outputBlock ./channel-artifacts/genesis.block
+  elif [ "$CONSENSUS_TYPE" == "etcdraft" ]; then
+    configtxgen -profile SampleDevModeEtcdRaft -channelID byfn-sys-channel -outputBlock ./channel-artifacts/genesis.block
   else
     set +x
     echo "unrecognized CONSESUS_TYPE='$CONSENSUS_TYPE'. exiting"
@@ -540,7 +542,7 @@ while getopts "h?c:t:d:f:s:l:i:o:v" opt; do
   i)
     IMAGETAG=$(go env GOARCH)"-"$OPTARG
     ;;
-   o)
+  o)
     CONSENSUS_TYPE=$OPTARG
     ;;
   v)
