@@ -28,7 +28,7 @@ if [ $1 != 0 ]; then
 fi
 }
 
-cd $BASE_FOLDER/fabric-samples/fabcar || exit
+cd $WORKSPACE/$BASE_DIR/fabcar || exit
 export PATH=gopath/src/github.com/hyperledger/fabric-samples/bin:$PATH
 
 LANGUAGES="go javascript typescript"
