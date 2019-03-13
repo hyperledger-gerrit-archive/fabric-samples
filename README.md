@@ -1,3 +1,4 @@
+
 [//]: # (SPDX-License-Identifier: CC-BY-4.0)
 
 ## Hyperledger Fabric Samples
@@ -18,6 +19,10 @@ are 1.4.0, 1.4.0 and 0.4.14 respectively.
 ```bash
 ./scripts/bootstrap.sh [version] [ca version] [thirdparty_version]
 ```
+
+### Continuous Integration
+
+Please have a look at [Continuous integration Process](docs/fabric-samples-ci.md)
 
 ## License <a name="license"></a>
 
