@@ -1,0 +1,118 @@
+
+This is a sample Fabtoken application that demonstrates how to perform token operations
+with a Fabric network using Node.js SDK.
+
+It assumes an understanding of the Hyperledger Fabric network (orderers, peers, and channels) and of Node.js application development, including the use of the Javascript promise and async await.
+
+For Node.js SDK documents, refer to
+[Hyperledger Fabric SDK for node.js](https://fabric-sdk-node.github.io/master/index.html)
+
+For Fabtoken API and tutorial in Node.js SDK, refer to the following:
+* [TokenClient JavaScript document](https://fabric-sdk-node.github.io/master/TokenClient.html)
+* [Node.js SDK Fabtoken tutorial](https://fabric-sdk-node.github.io/master/tutorial-fabtoken.html)
+
+### Understand the sample application
+The sample application `fabtoken.js` can be found under the `javascript` directory. You may examine the `fabtoken.js` file to understand how to create users via pre-generated
+crypto materials and how to invoke the token APIs.
+
+#### Create Fabric client instances
+The `start` method in `fabtoken.js` demonstrates how to create fabric client instances such as fabric_client,
+channel, orderer, and peer.
+
+#### Create users
+The `createUsers` method in `fabtoken.js` demonstrates how to create `admin`, `user1` and `uesr2`
+by loading the pre-generated crypto files.
+
+#### Create a TokenClient instance
+To perform token oeprations, you must create a `TokenClient` instance from a `Client` object.
+Make sure the client has set the user context. Below is the code snippet.
+
+```
+	// set user context to the client
+	await client.setUserContext(user, true);
+
+	// create a TokenClient instance
+	const tokenClient = client.newTokenClient(channel, 'localhost:7051');
+```
+
+#### Issue tokens
+The `issue` method in `fabtoken.js` demonstrates how to create an issue request
+and invoke the `issue` method from a TokenClient instance.
+
+#### List tokens
+The `list` method in fabtoken.js demonstrates how to
+invoke the `list` method from a TokenClient instance.
+
+#### Transfer tokens
+The `transfer` method in `fabtoken.js` demonstrates how to create a transfer request
+and invoke the `transfer` method from a TokenClient instance.
+
+#### Redeem tokens
+The `redeem` method in `fabtoken.js` demonstrates how to create a redeem request
+and invoke the `redeem` method from a TokenClient instance.
+
+### Run the sample application
+Follow the instructions below to start fabric network and run the sample application `fabtoken.js`.
+
+#### Setup
+* Start fabric network: `./startFabric.sh`
+ * It uses the "basic-network", where crypto materials are pre-generated
+* Change to "javascript" directory: `cd javascript`
+* Install all required packages: `npm install`
+* The sample application automatically creates user objects for "user1" and user2".
+Therefore, you can pass "user1" and "user2" in the following operations.
+
+#### Issue tokens
+* node fabtoken issue <username> <token_type> <quantity>
+* example: issue a token to user1 in "USD" type and 100 quantity; then issue another token to user1 in "EURO" type and 200 quantity.
+
+```
+   node fabtoken issue user1 USD 100
+   node fabtoken issue user1 EURO 200
+```
+
+#### List tokens
+* node fabtoken list <username>
+* the list operation returns a list of tokens and each token has a tx_id and index
+* select a token to transfer or redeem and pass "tx_id" and "index" as input parameters
+* example: list user1's tokens
+
+```
+   node fabtoken list user1
+
+    [ { id:
+           { tx_id: 'ab5670d3b20b6247b17a342dd2c5c4416f79db95c168beccb7d32b3dd382e5a5',
+             index: 0 },
+        type: 'EURO',
+        quantity: '200' },
+      { id:
+           { tx_id: 'c9b1211d9ad809e6ee1b542de6886d8d1d9e1c938d88eff23a3ddb4e8c080e4d',
+             index: 0 },
+        type: 'USD',
+        quantity: '100' }]
+```
+
+#### Transfer tokens
+* node fabtoken transfer <from_user> <to_user> <transfer_quantity> <remaining_quantity> <tx\_id> <index>
+* <tx\_id> and <index> are the "tx\_id" and "index" returned from the list operation
+* <transfer_quantity> is the quantity you want to transfer and <remaining_quantity> is the remaining quantity after transfer
+* both numbers are required and they must be added up to the same quantity as the original token. Otherwise, the transaction will be invalidated.
+* example: user1 transfer 30 quantity of the token to user2 and remaining quanity is 70 (100 - 30)
+
+```
+   node fabtoken transfer user1 user2 30 70 c9b1211d9ad809e6ee1b542de6886d8d1d9e1c938d88eff23a3ddb4e8c080e4d 0
+```
+
+#### Redeem tokens
+* node fabtoken redeem <username> <redeem\_quantity> <tx\_id> <index>
+* <tx\_id> and <index> are the "tx\_id" and "index" returned from the list operation
+* example: user2 redeems "10" quantity of the token as specified by <tx\_id> and <index>
+
+```
+   node fabtoken redeem user2 10 477c7bf2002814497c228fd8cbc4d80c8b7f1602b2c17ffadb6cf7e5783fa47a 0
+```
+
+#### Clean up
+* Change to `fabric-samples/basic-network` directory
+ * To stop the fabric network, run `./stop.sh`
+ * To completely remove all incriminating evidence of the network, run `./teardown.sh`
