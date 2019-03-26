@@ -1,0 +1,8 @@
+Verified+1: Hyperledger Jobbuilder <jobbuilder@jenkins.hyperledger.org>
+Code-Review+2: Jason Yellick <jyellick@us.ibm.com>
+Code-Review+2: Alessandro Sorniotti <ale.linux@sopit.net>
+Submitted-by: Alessandro Sorniotti <ale.linux@sopit.net>
+Submitted-at: Tue, 26 Mar 2019 17:14:09 +0000
+Reviewed-on: https://gerrit.hyperledger.org/r/30236
+Project: fabric-samples
+Branch: refs/heads/master
