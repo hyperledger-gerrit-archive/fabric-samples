@@ -181,6 +181,7 @@ Profiles:
                     - *rrprovider
                     - *auditor
     IRSChannel:
+        <<: *ChannelDefaults
         Consortium: SampleConsortium
         Application:
             <<: *ApplicationDefaults
