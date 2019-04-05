@@ -51,4 +51,22 @@ fabcar_Tests() {
   ./fabcar.sh
 }
 
+# run fabtoken tests
+fabtoken_Tests() {
+
+  echo " #############################"
+  echo "npm version ------> $(npm -v)"
+  echo "node version ------> $(node -v)"
+  echo " #############################"
+
+  echo
+  echo " _____      _      ____     _______    __      ___   __    _____    __    __  "
+  echo " |  ___|    / \    | __ )     | |    / _  \    | |  / /   | ____|   | |\  | | "
+  echo " | |_      / _ \   |  _ \     | |   | |  | |   | | / /    | |___    | | \ | | "
+  echo " |  _|    / ___ \  | |_) |    | |   | |_ | |   | | \ \    |  ___|   | | \ | | "
+  echo " |_|     /_/   \_\ |____/     |_|    \ __ /    |_|  \_\   |_|____   |_|  \|_| "
+
+  ./fabtoken.sh
+}
+
 Parse_Arguments $@
