@@ -145,4 +145,12 @@ fabcar_Tests() {
                  echo "-----------> Execute FabCar Tests"
                  ./fabcar.sh
 }
+# run fabtoken tests
+fabtoken_Tests() {
+                 echo
+                 echo "npm version ------> $(npm -v)"
+                 echo "node version ------> $(node -v)"
+                 echo "-----------> Execute FabToken Tests"
+                 ./fabtoken.sh
+}
 Parse_Arguments $@
