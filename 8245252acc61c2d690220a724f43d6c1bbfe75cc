@@ -1,0 +1,10 @@
+Code-Review+1: Bret Harrison <beharrison@nc.rr.com>
+Code-Review+2: Alessandro Sorniotti <ale.linux@sopit.net>
+Verified+1: Hyperledger Jobbuilder <jobbuilder@jenkins.hyperledger.org>
+Code-Review+1: Marcus Brandenburger <bur@zurich.ibm.com>
+Code-Review+2: Gari Singh <gari.r.singh@gmail.com>
+Submitted-by: Gari Singh <gari.r.singh@gmail.com>
+Submitted-at: Tue, 09 Apr 2019 14:28:14 +0000
+Reviewed-on: https://gerrit.hyperledger.org/r/30309
+Project: fabric-samples
+Branch: refs/heads/master
