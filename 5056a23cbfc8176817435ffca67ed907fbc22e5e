@@ -1,0 +1,8 @@
+Code-Review+2: Yacov Manevich <yacovm@il.ibm.com>
+Code-Review+2: Alessandro Sorniotti <ale.linux@sopit.net>
+Verified+1: Hyperledger Jobbuilder <jobbuilder@jenkins.hyperledger.org>
+Submitted-by: Gari Singh <gari.r.singh@gmail.com>
+Submitted-at: Thu, 11 Apr 2019 15:39:17 +0000
+Reviewed-on: https://gerrit.hyperledger.org/r/30776
+Project: fabric-samples
+Branch: refs/heads/master
