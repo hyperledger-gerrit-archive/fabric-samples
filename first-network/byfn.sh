@@ -430,11 +430,11 @@ function generateChannelArtifacts() {
   echo "CONSENSUS_TYPE="$CONSENSUS_TYPE
   set -x
   if [ "$CONSENSUS_TYPE" == "solo" ]; then
-    configtxgen -profile TwoOrgsOrdererGenesis -channelID byfn-sys-channel -outputBlock ./channel-artifacts/genesis.block
+    configtxgen -profile TwoOrgsOrdererGenesis -channelID $SYS_CHANNEL_NAME -outputBlock ./channel-artifacts/genesis.block
   elif [ "$CONSENSUS_TYPE" == "kafka" ]; then
-    configtxgen -profile SampleDevModeKafka -channelID byfn-sys-channel -outputBlock ./channel-artifacts/genesis.block
+    configtxgen -profile SampleDevModeKafka -channelID $SYS_CHANNEL_NAME -outputBlock ./channel-artifacts/genesis.block
   elif [ "$CONSENSUS_TYPE" == "etcdraft" ]; then
-    configtxgen -profile SampleMultiNodeEtcdRaft -channelID byfn-sys-channel -outputBlock ./channel-artifacts/genesis.block
+    configtxgen -profile SampleMultiNodeEtcdRaft -channelID $SYS_CHANNEL_NAME -outputBlock ./channel-artifacts/genesis.block
   else
     set +x
     echo "unrecognized CONSESUS_TYPE='$CONSENSUS_TYPE'. exiting"
@@ -498,6 +498,8 @@ CLI_TIMEOUT=10
 CLI_DELAY=3
 # channel name defaults to "mychannel"
 CHANNEL_NAME="mychannel"
+# system channel name
+SYS_CHANNEL_NAME="byfn-sys-channel"
 # use this as the default docker-compose yaml definition
 COMPOSE_FILE=docker-compose-cli.yaml
 #

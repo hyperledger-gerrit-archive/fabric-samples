@@ -9,3 +9,5 @@
 /config
 .DS_Store
 .project
+# Goland IDE artifacts
+/.idea
