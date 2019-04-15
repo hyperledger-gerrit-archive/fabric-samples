@@ -151,7 +151,9 @@ Capabilities:
         # level, but which would be incompatible with orderers from prior releases.
         # Prior to enabling V1.1 orderer capabilities, ensure that all
         # orderers on a channel are at v1.1.0 or later.
-        V1_1: true
+        # V1_1: true
+
+        V2_0: true
 
     # Application capabilities apply only to the peer network, and may be safely
     # used with prior release orderers.
@@ -328,7 +330,8 @@ Profiles:
                 Organizations:
                     - *Org1
                     - *Org2
-    TwoOrgsChannel:
+
+    TwoOrgsChannel: &TwoOrgsChannelBase
         Consortium: SampleConsortium
         <<: *ChannelDefaults
         Application:
@@ -338,6 +341,34 @@ Profiles:
                 - *Org2
             Capabilities:
                 <<: *ApplicationCapabilities
+
+    TwoOrgsChannelSubset:
+        <<: *TwoOrgsChannelBase
+        Orderer:
+            <<: *OrdererDefaults
+            OrdererType: etcdraft
+            EtcdRaft:
+                Consenters:
+                - Host: orderer.example.com
+                  Port: 7050
+                  ClientTLSCert: crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/tls/server.crt
+                  ServerTLSCert: crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/tls/server.crt
+                - Host: orderer2.example.com
+                  Port: 7050
+                  ClientTLSCert: crypto-config/ordererOrganizations/example.com/orderers/orderer2.example.com/tls/server.crt
+                  ServerTLSCert: crypto-config/ordererOrganizations/example.com/orderers/orderer2.example.com/tls/server.crt
+                - Host: orderer3.example.com
+                  Port: 7050
+                  ClientTLSCert: crypto-config/ordererOrganizations/example.com/orderers/orderer3.example.com/tls/server.crt
+                  ServerTLSCert: crypto-config/ordererOrganizations/example.com/orderers/orderer3.example.com/tls/server.crt
+            Addresses:
+            - orderer.example.com:7050
+            - orderer2.example.com:7050
+            - orderer3.example.com:7050
+            Organizations:
+            - *OrdererOrg
+            Capabilities:
+                <<: *OrdererCapabilities
 
     SampleDevModeKafka:
         <<: *ChannelDefaults
