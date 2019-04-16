@@ -134,9 +134,9 @@ commands in the following section.
 
 ### Transactions
 
-The chaincode is instantiated as follows:
+The chaincode is initialized as follows:
 ```
-peer chaincode instantiate -o irs-orderer:7050 -C irs -n irscc -l golang -v 0 -c '{"Args":["init","auditor","100000","rrprovider","myrr"]}' -P "AND(OR('partya.peer','partyb.peer','partyc.peer'), 'auditor.peer')"
+peer chaincode invoke -o irs-orderer:7050 --isInit -C irs --waitForEvent -n irscc --peerAddresses irs-rrprovider:7051 --peerAddresses irs-partya:7051 --peerAddresses irs-partyb:7051 --peerAddresses irs-partyc:7051 --peerAddresses irs-auditor:7051 -c '{"Args":["init","auditor","100000","rrprovider","myrr"]}'
 ```
 This sets an auditing threshold of 1M, above which the `auditor` organization
 needs to be involved. It also specifies the `myrr` reference rate provided by
@@ -173,4 +173,7 @@ peer chaincode invoke -o irs-orderer:7050 -C irs --waitForEvent -n irscc `--peer
 As an exercise, try to create a new swap above the auditing threshold and see
 how validation fails if the auditor is not involved in every operation on the
 swap. Also try to calculate payment info before settling a prior payment to a
-swap.
+swap. You can run the commands yourself using the CLI container by issuing the
+command ``docker exec -it cli bash``. You will need to set the corresponding
+environment variables for the organization issuing the command. You refer to the
+`network/scripts/script.sh` file for more information.
