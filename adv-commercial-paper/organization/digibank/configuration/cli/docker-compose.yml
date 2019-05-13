@@ -1,0 +1,34 @@
+#
+# Copyright IBM Corp All Rights Reserved
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+version: '2'
+
+networks:
+  adv-commercialpaper-net:
+    external:
+      name: adv-commercialpaper-net
+
+services:
+  cli1.digibank.example.com:
+    container_name: cli1digibank
+    image: hyperledger/fabric-tools
+    tty: true
+    environment:
+      - FABRIC_LOGGING_SPEC=info
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_PEER_ID=cli
+      - CORE_PEER_ADDRESS=peer1.digibank.example.com:7051
+      - CORE_PEER_LOCALMSPID=digibankMSP
+      - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/identity/user/Admin@digibank.example.com/msp
+      - CORE_CHAINCODE_KEEPALIVE=10
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: /bin/bash
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./../../identity:/var/hyperledger/identity
+        - ./configtx:/var/hyperledger/peer/configtx
+    networks:
+        - adv-commercialpaper-net

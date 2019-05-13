@@ -1,0 +1,27 @@
+#
+# Copyright IBM Corp All Rights Reserved
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+version: '2'
+
+networks:
+  adv-commercialpaper-net:
+    external:
+      name: adv-commercialpaper-net
+
+services:
+  ca.digibank.example.com:
+    container_name: cadigibank
+    image: hyperledger/fabric-ca
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=cadigibank
+      - FABRIC_CA_SERVER_TLS_ENABLED=false
+    ports:
+      - "8054:7054"
+    command: sh -c 'fabric-ca-server start --ca.certfile /var/hyperledger/identity/ca/ca.digibank.example.com/ca.digibank.example.com-cert.pem --ca.keyfile /var/hyperledger/identity/ca/ca.digibank.example.com/ad1b6001d3600a968adc24e7a3d8ef9ea994ed902d2bccbc10396c2612426e54_sk -b admin:adminpw -d'
+    volumes:
+      - ./../../../identity/:/var/hyperledger/identity
+    networks:
+      - adv-commercialpaper-net

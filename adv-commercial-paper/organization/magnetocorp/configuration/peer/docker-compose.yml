@@ -1,0 +1,63 @@
+#
+# Copyright IBM Corp All Rights Reserved
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+version: '2'
+
+networks:
+  adv-commercialpaper-net:
+    external:
+      name: adv-commercialpaper-net
+
+volumes:
+  peer7.magnetocorp.example.com:
+
+services:
+
+  couchdb7.magnetocorp.example.com:
+    container_name: couchdb7magnetocorp
+    image: hyperledger/fabric-couchdb
+    environment:
+      - COUCHDB_USER=
+      - COUCHDB_PASSWORD=
+    ports:
+      - 8984:5984
+    networks:
+      - adv-commercialpaper-net
+
+  peer7.magnetocorp.example.com:
+    container_name: peer7magnetocorp
+    image: hyperledger/fabric-peer
+    environment:
+      - FABRIC_LOGGING_SPEC=info
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=adv-commercialpaper-net
+      - CORE_PEER_ID=peer7.magnetocorp.example.com
+      - CORE_PEER_ADDRESS=peer7.magnetocorp.example.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer7.magnetocorp.example.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer7.magnetocorp.example.com:7051
+      - CORE_PEER_GOSSIP_USELEADERELECTION=true
+      - CORE_PEER_GOSSIP_ORGLEADER=false
+      - CORE_PEER_PROFILE_ENABLED=true
+      - CORE_PEER_LOCALMSPID=magnetocorpMSP
+      - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/identity/peer/peer7.magnetocorp.example.com/msp
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb7magnetocorp:5984
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=
+      - CORE_PEER_TLS_ENABLED=false
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./../../identity/:/var/hyperledger/identity
+        - ./configtx:/var/hyperledger/peer/configtx
+        - peer7.magnetocorp.example.com:/var/hyperledger/production
+    ports:
+      - 10051:7051
+      - 10053:7053
+    depends_on:
+      - couchdb7.magnetocorp.example.com
+    networks:
+      - adv-commercialpaper-net

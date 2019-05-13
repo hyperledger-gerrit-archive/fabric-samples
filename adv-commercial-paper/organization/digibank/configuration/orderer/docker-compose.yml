@@ -1,0 +1,39 @@
+#
+# Copyright IBM Corp All Rights Reserved
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+version: '2'
+
+networks:
+  adv-commercialpaper-net:
+    external:
+      name: adv-commercialpaper-net
+
+volumes:
+  orderer1.digibank.example.com:
+
+services:
+  orderer1.digibank.example.com:
+    container_name: orderer1digibank
+    image: hyperledger/fabric-orderer
+    environment:
+      - FABRIC_LOGGING_SPEC=debug
+      - ORDERER_GENERAL_LOGLEVEL=INFO
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/configtx/ordering-service.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=digibankOrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      - ORDERER_GENERAL_TLS_ENABLED=false
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+      - ./configtx/ordering-service.genesis.block:/var/hyperledger/orderer/configtx/ordering-service.genesis.block
+      - ./../../identity/orderer/orderer1.orderer.digibank.example.com/msp:/var/hyperledger/orderer/msp
+      - ./../../identity/orderer/orderer1.orderer.digibank.example.com/msp:/var/hyperledger/orderer/tls
+      - orderer1.digibank.example.com:/var/hyperledger/production/orderer
+    ports:
+      - 7050:7050
+    networks:
+      - adv-commercialpaper-net
