@@ -1,0 +1,27 @@
+#
+# Copyright IBM Corp All Rights Reserved
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+version: '2'
+
+networks:
+  adv-commercialpaper-net:
+    external:
+      name: adv-commercialpaper-net
+
+services:
+  ca.fedbank.example.com:
+    container_name: cafedbank
+    image: hyperledger/fabric-ca
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=cafedbank
+      - FABRIC_CA_SERVER_TLS_ENABLED=false
+    ports:
+      - "10054:7054"
+    command: sh -c 'fabric-ca-server start --ca.certfile /var/hyperledger/identity/ca/ca.fedbank.example.com/ca.fedbank.example.com-cert.pem --ca.keyfile /var/hyperledger/identity/ca/ca.fedbank.example.com/7d8d6fcab78f4c13338a319a50ebd783b741836acb0942755f285c25edbec24b_sk -b admin:adminpw -d'
+    volumes:
+      - ./../../../identity/:/var/hyperledger/identity
+    networks:
+      - adv-commercialpaper-net
