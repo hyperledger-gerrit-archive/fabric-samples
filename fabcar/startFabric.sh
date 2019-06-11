@@ -51,9 +51,64 @@ ORG1_TLS_ROOTCERT_FILE=${CONFIG_ROOT}/crypto/peerOrganizations/org1.example.com/
 ORG2_MSPCONFIGPATH=${CONFIG_ROOT}/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
 ORG2_TLS_ROOTCERT_FILE=${CONFIG_ROOT}/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
 ORDERER_TLS_ROOTCERT_FILE=${CONFIG_ROOT}/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+<<<<<<< HEAD   (62fa4f [FAB-15213] Add Java FabCar sample contract)
 set -x
+=======
+
+PEER0_ORG1="docker exec
+-e CORE_PEER_LOCALMSPID=Org1MSP
+-e CORE_PEER_ADDRESS=peer0.org1.example.com:7051
+-e CORE_PEER_MSPCONFIGPATH=${ORG1_MSPCONFIGPATH}
+-e CORE_PEER_TLS_ROOTCERT_FILE=${ORG1_TLS_ROOTCERT_FILE}
+cli
+peer
+--tls=true
+--cafile=${ORDERER_TLS_ROOTCERT_FILE}
+--orderer=orderer.example.com:7050"
+
+PEER1_ORG1="docker exec
+-e CORE_PEER_LOCALMSPID=Org1MSP
+-e CORE_PEER_ADDRESS=peer1.org1.example.com:8051
+-e CORE_PEER_MSPCONFIGPATH=${ORG1_MSPCONFIGPATH}
+-e CORE_PEER_TLS_ROOTCERT_FILE=${ORG1_TLS_ROOTCERT_FILE}
+cli
+peer
+--tls=true
+--cafile=${ORDERER_TLS_ROOTCERT_FILE}
+--orderer=orderer.example.com:7050"
+
+PEER0_ORG2="docker exec
+-e CORE_PEER_LOCALMSPID=Org2MSP
+-e CORE_PEER_ADDRESS=peer0.org2.example.com:9051
+-e CORE_PEER_MSPCONFIGPATH=${ORG2_MSPCONFIGPATH}
+-e CORE_PEER_TLS_ROOTCERT_FILE=${ORG2_TLS_ROOTCERT_FILE}
+cli
+peer
+--tls=true
+--cafile=${ORDERER_TLS_ROOTCERT_FILE}
+--orderer=orderer.example.com:7050"
+
+PEER1_ORG2="docker exec
+-e CORE_PEER_LOCALMSPID=Org2MSP
+-e CORE_PEER_ADDRESS=peer1.org2.example.com:10051
+-e CORE_PEER_MSPCONFIGPATH=${ORG2_MSPCONFIGPATH}
+-e CORE_PEER_TLS_ROOTCERT_FILE=${ORG2_TLS_ROOTCERT_FILE}
+cli
+peer
+--tls=true
+--cafile=${ORDERER_TLS_ROOTCERT_FILE}
+--orderer=orderer.example.com:7050"
+
+echo "Packaging smart contract on peer0.org1.example.com"
+${PEER0_ORG1} lifecycle chaincode package \
+  fabcar.tar.gz \
+  --path "$CC_SRC_PATH" \
+  --lang "$CC_RUNTIME_LANGUAGE" \
+  --label fabcarv1
+>>>>>>> CHANGE (779f8f [FAB-15649]Fix Fabcar to install Chaincode on all peers)
 
 echo "Installing smart contract on peer0.org1.example.com"
+<<<<<<< HEAD   (62fa4f [FAB-15213] Add Java FabCar sample contract)
 docker exec \
   -e CORE_PEER_LOCALMSPID=Org1MSP \
   -e CORE_PEER_ADDRESS=peer0.org1.example.com:7051 \
@@ -65,8 +120,43 @@ docker exec \
     -v 1.0 \
     -p "$CC_SRC_PATH" \
     -l "$CC_RUNTIME_LANGUAGE"
+=======
+${PEER0_ORG1} lifecycle chaincode install \
+  fabcar.tar.gz
+
+echo "Installing smart contract on peer1.org1.example.com"
+${PEER1_ORG1} lifecycle chaincode install \
+  fabcar.tar.gz
+
+echo "Determining package ID for smart contract on peer0.org1.example.com"
+REGEX='Package ID: (.*), Label: fabcarv1'
+if [[ `${PEER0_ORG1} lifecycle chaincode queryinstalled` =~ $REGEX ]]; then
+  PACKAGE_ID_ORG1=${BASH_REMATCH[1]}
+else
+  echo Could not find package ID for fabcarv1 chaincode on peer0.org1.example.com
+  exit 1
+fi
+
+echo "Approving smart contract for org1"
+${PEER0_ORG1} lifecycle chaincode approveformyorg \
+  --package-id ${PACKAGE_ID_ORG1} \
+  --channelID mychannel \
+  --name fabcar \
+  --version 1.0 \
+  --signature-policy "AND('Org1MSP.member','Org2MSP.member')" \
+  --sequence 1 \
+  --waitForEvent
+
+echo "Packaging smart contract on peer0.org2.example.com"
+${PEER0_ORG2} lifecycle chaincode package \
+  fabcar.tar.gz \
+  --path "$CC_SRC_PATH" \
+  --lang "$CC_RUNTIME_LANGUAGE" \
+  --label fabcarv1
+>>>>>>> CHANGE (779f8f [FAB-15649]Fix Fabcar to install Chaincode on all peers)
 
 echo "Installing smart contract on peer0.org2.example.com"
+<<<<<<< HEAD   (62fa4f [FAB-15213] Add Java FabCar sample contract)
 docker exec \
   -e CORE_PEER_LOCALMSPID=Org2MSP \
   -e CORE_PEER_ADDRESS=peer0.org2.example.com:9051 \
@@ -78,7 +168,14 @@ docker exec \
     -v 1.0 \
     -p "$CC_SRC_PATH" \
     -l "$CC_RUNTIME_LANGUAGE"
+=======
+${PEER0_ORG2} lifecycle chaincode install fabcar.tar.gz
 
+echo "Installing smart contract on peer1.org2.example.com"
+${PEER1_ORG2} lifecycle chaincode install fabcar.tar.gz
+>>>>>>> CHANGE (779f8f [FAB-15649]Fix Fabcar to install Chaincode on all peers)
+
+<<<<<<< HEAD   (62fa4f [FAB-15213] Add Java FabCar sample contract)
 echo "Instantiating smart contract on mychannel"
 docker exec \
   -e CORE_PEER_LOCALMSPID=Org1MSP \
@@ -96,11 +193,47 @@ docker exec \
     --cafile ${ORDERER_TLS_ROOTCERT_FILE} \
     --peerAddresses peer0.org1.example.com:7051 \
     --tlsRootCertFiles ${ORG1_TLS_ROOTCERT_FILE}
+=======
+echo "Determining package ID for smart contract on peer0.org2.example.com"
+REGEX='Package ID: (.*), Label: fabcarv1'
+if [[ `${PEER0_ORG2} lifecycle chaincode queryinstalled` =~ $REGEX ]]; then
+  PACKAGE_ID_ORG2=${BASH_REMATCH[1]}
+else
+  echo Could not find package ID for fabcarv1 chaincode on peer0.org2.example.com
+  exit 1
+fi
+>>>>>>> CHANGE (779f8f [FAB-15649]Fix Fabcar to install Chaincode on all peers)
 
+<<<<<<< HEAD   (62fa4f [FAB-15213] Add Java FabCar sample contract)
 echo "Waiting for instantiation request to be committed ..."
 sleep 10
+=======
+echo "Approving smart contract for org2"
+${PEER0_ORG2} lifecycle chaincode approveformyorg \
+  --package-id ${PACKAGE_ID_ORG2} \
+  --channelID mychannel \
+  --name fabcar \
+  --version 1.0 \
+  --signature-policy "AND('Org1MSP.member','Org2MSP.member')" \
+  --sequence 1 \
+  --waitForEvent
+
+echo "Committing smart contract"
+${PEER0_ORG1} lifecycle chaincode commit \
+  --channelID mychannel \
+  --name fabcar \
+  --version 1.0 \
+  --signature-policy "AND('Org1MSP.member','Org2MSP.member')" \
+  --sequence 1 \
+  --waitForEvent \
+  --peerAddresses peer0.org1.example.com:7051 \
+  --peerAddresses peer0.org2.example.com:9051 \
+  --tlsRootCertFiles ${ORG1_TLS_ROOTCERT_FILE} \
+  --tlsRootCertFiles ${ORG2_TLS_ROOTCERT_FILE}
+>>>>>>> CHANGE (779f8f [FAB-15649]Fix Fabcar to install Chaincode on all peers)
 
 echo "Submitting initLedger transaction to smart contract on mychannel"
+<<<<<<< HEAD   (62fa4f [FAB-15213] Add Java FabCar sample contract)
 docker exec \
   -e CORE_PEER_LOCALMSPID=Org1MSP \
   -e CORE_PEER_MSPCONFIGPATH=${ORG1_MSPCONFIGPATH} \
@@ -118,6 +251,23 @@ docker exec \
     --tlsRootCertFiles ${ORG1_TLS_ROOTCERT_FILE} \
     --tlsRootCertFiles ${ORG2_TLS_ROOTCERT_FILE}
 set +x
+=======
+echo "The transaction is sent to all of the peers so that chaincode is built before receiving the following requests"
+${PEER0_ORG1} chaincode invoke \
+  -C mychannel \
+  -n fabcar \
+  -c '{"function":"initLedger","Args":[]}' \
+  --waitForEvent \
+  --waitForEventTimeout 300s \
+  --peerAddresses peer0.org1.example.com:7051 \
+  --peerAddresses peer1.org1.example.com:8051 \
+  --peerAddresses peer0.org2.example.com:9051 \
+  --peerAddresses peer1.org2.example.com:10051 \
+  --tlsRootCertFiles ${ORG1_TLS_ROOTCERT_FILE} \
+  --tlsRootCertFiles ${ORG1_TLS_ROOTCERT_FILE} \
+  --tlsRootCertFiles ${ORG2_TLS_ROOTCERT_FILE} \
+  --tlsRootCertFiles ${ORG2_TLS_ROOTCERT_FILE}
+>>>>>>> CHANGE (779f8f [FAB-15649]Fix Fabcar to install Chaincode on all peers)
 
 cat <<EOF
 
