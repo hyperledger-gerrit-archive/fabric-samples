@@ -4,8 +4,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// Jenkinfile will get triggered on verify and merge jobs and run byfn, eyfn and fabcar
-// tests.
 
 // global shared library from ci-management repository
 // https://github.com/hyperledger/ci-management/tree/master/vars (Global Shared scripts)
