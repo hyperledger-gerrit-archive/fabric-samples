@@ -16,8 +16,8 @@ node ('hyp-x') { // trigger build on x86_64 node
     env.BASE_IMAGE_VER = sh(returnStdout: true, script: 'cat Makefile | grep "BASEIMAGE_RELEASE=" | cut -d "=" -f2').trim() // BASEIMAGE Version from fabric Makefile
     env.BASE_IMAGE_TAG = "${OS_VER}-${BASE_IMAGE_VER}" //fabric baseimage version
     env.PROJECT_DIR = "gopath/src/github.com/hyperledger"
-    env.GOPATH = "$WORKSPACE/gopath"
-    env.PATH = "$GOPATH/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:${nodeHome}/bin:$PATH"
+    // env.GOPATH = "$WORKSPACE/gopath"
+    // env.PATH = "$GOPATH/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:${nodeHome}/bin:$PATH"
     def jobname = sh(returnStdout: true, script: 'echo ${JOB_NAME} | grep -q "verify" && echo patchset || echo merge').trim()
     def failure_stage = "none"
     // delete working directory
@@ -32,6 +32,7 @@ node ('hyp-x') { // trigger build on x86_64 node
                        branches: [[name: '$GERRIT_REFSPEC']],
                        extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: '$BASE_DIR'], [$class: 'CheckoutOption', timeout: 10]],
                        userRemoteConfigs: [[credentialsId: 'hyperledger-jobbuilder', name: 'origin', refspec: '$GERRIT_REFSPEC:$GERRIT_REFSPEC', url: '$GIT_BASE']]])
+                   println "pwd"
               } else {
                    // Clone fabric-samples on merge
                    println "Clone $PROJECT repository"
