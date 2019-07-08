@@ -80,9 +80,9 @@
                 } else {
                   dir("$ROOTDIR/$BASE_DIR") {
                     // Set PATH
-                    env.GOPATH = "$WORKSPACE/gopath"
-                    env.GOROOT = "/opt/go/go" + props["GO_VER"] + ".linux." + "$MARCH"
-                    env.PATH = "$GOPATH/bin:$GOROOT/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:${nodeHome}/bin:$PATH"
+                    // env.GOPATH = "$WORKSPACE/gopath"
+                    // env.GOROOT = "/opt/go/go" + props["GO_VER"] + ".linux." + "$MARCH"
+                    // env.PATH = "$GOPATH/bin:$GOROOT/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:${nodeHome}/bin:$PATH"
                     // Pull Binaries with latest version from nexus2
                     fabBuildLibrary.pullBinaries(props["FAB_BINARY_VER"], props["FAB_BINARY_REPO"])
                     // Pull Docker Images from nexus3
