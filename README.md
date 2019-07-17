@@ -5,7 +5,7 @@
 Please visit the [installation instructions](http://hyperledger-fabric.readthedocs.io/en/latest/install.html)
 to ensure you have the correct prerequisites installed. Please use the
 version of the documentation that matches the version of the software you
-intend to use to ensure alignment.
+intend to use to ensure alignment. TEST.
 
 ## Download Binaries and Docker Images
 
