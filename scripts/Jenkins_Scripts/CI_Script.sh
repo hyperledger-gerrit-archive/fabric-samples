@@ -139,5 +139,7 @@ fabcar_Tests() {
                  echo "node version ------> $(node -v)"
                  echo "-----------> Execute FabCar Tests"
                  ./fabcar.sh
+                 echo "Also running the compilation and lint tests of CommercialPaper"
+                 make -f ../../commercial-paper/.build/makefile
 }
 Parse_Arguments $@
