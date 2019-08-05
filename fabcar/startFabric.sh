@@ -176,6 +176,20 @@ ${PEER0_ORG1} lifecycle chaincode commit \
   --tlsRootCertFiles ${ORG1_TLS_ROOTCERT_FILE} \
   --tlsRootCertFiles ${ORG2_TLS_ROOTCERT_FILE}
 
+echo "Query Committing smart contract for org1"
+${PEER0_ORG1} lifecycle chaincode querycommitted \
+  --channelID mychannel \
+  --name fabcar \
+  --peerAddresses peer0.org1.example.com:7051 \
+  --tlsRootCertFiles ${ORG1_TLS_ROOTCERT_FILE} \
+
+echo "Query Committing smart contract for org2"
+${PEER0_ORG2} lifecycle chaincode querycommitted \
+  --channelID mychannel \
+  --name fabcar \
+  --peerAddresses peer0.org2.example.com:9051 \
+  --tlsRootCertFiles ${ORG2_TLS_ROOTCERT_FILE}  
+
 echo "Submitting initLedger transaction to smart contract on mychannel"
 # echo "The transaction is sent to all of the peers so that chaincode is built before receiving the following requests"
 ${PEER0_ORG1} chaincode invoke \
