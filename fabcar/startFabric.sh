@@ -46,6 +46,7 @@ echo y | ./byfn.sh down
 echo y | ./byfn.sh up -a -n -s couchdb
 popd
 
+CLI_DELAY=3
 CONFIG_ROOT=/opt/gopath/src/github.com/hyperledger/fabric/peer
 ORG1_MSPCONFIGPATH=${CONFIG_ROOT}/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
 ORG1_TLS_ROOTCERT_FILE=${CONFIG_ROOT}/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
@@ -163,6 +164,22 @@ ${PEER0_ORG2} lifecycle chaincode approveformyorg \
   --sequence 1 \
   --waitForEvent
 
+echo "Check whether the chaincode definition is ready to be committed for org1"
+sleep $CLI_DELAY
+${PEER0_ORG1} lifecycle chaincode checkcommitreadiness \
+  --channelID mychannel \
+  --name fabcar \
+  --version 1.0 \
+  --sequence 1
+
+echo "Check whether the chaincode definition is ready to be committed for org2"
+sleep $CLI_DELAY
+${PEER0_ORG2} lifecycle chaincode checkcommitreadiness \
+  --channelID mychannel \
+  --name fabcar \
+  --version 1.0 \
+  --sequence 1
+
 echo "Committing smart contract"
 ${PEER0_ORG1} lifecycle chaincode commit \
   --channelID mychannel \
@@ -175,6 +192,20 @@ ${PEER0_ORG1} lifecycle chaincode commit \
   --peerAddresses peer0.org2.example.com:9051 \
   --tlsRootCertFiles ${ORG1_TLS_ROOTCERT_FILE} \
   --tlsRootCertFiles ${ORG2_TLS_ROOTCERT_FILE}
+
+echo "Query Committing smart contract for org1"
+${PEER0_ORG1} lifecycle chaincode querycommitted \
+  --channelID mychannel \
+  --name fabcar \
+  --peerAddresses peer0.org1.example.com:7051 \
+  --tlsRootCertFiles ${ORG1_TLS_ROOTCERT_FILE} \
+
+echo "Query Committing smart contract for org2"
+${PEER0_ORG2} lifecycle chaincode querycommitted \
+  --channelID mychannel \
+  --name fabcar \
+  --peerAddresses peer0.org2.example.com:9051 \
+  --tlsRootCertFiles ${ORG2_TLS_ROOTCERT_FILE}  
 
 echo "Submitting initLedger transaction to smart contract on mychannel"
 # echo "The transaction is sent to all of the peers so that chaincode is built before receiving the following requests"

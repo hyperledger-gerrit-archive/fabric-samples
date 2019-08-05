@@ -144,6 +144,10 @@ if [ "${NO_CHAINCODE}" != "true" ]; then
 	echo "Querying chaincode on peer0.org1..."
 	chaincodeQuery 0 1 90
 
+	## Install chaincode on peer1.org1
+	echo "Installing chaincode on peer1.org1..."
+	installChaincode 1 1
+
 	## Install chaincode on peer1.org2
 	echo "Installing chaincode on peer1.org2..."
 	installChaincode 1 2
