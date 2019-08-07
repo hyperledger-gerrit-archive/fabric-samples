@@ -1,0 +1,8 @@
+Verified+1: Hyperledger Jobbuilder <jobbuilder@jenkins.hyperledger.org>
+Code-Review+2: Arnaud J Le Hors <lehors@us.ibm.com>
+Verified+1: Arnaud J Le Hors <lehors@us.ibm.com>
+Submitted-by: Arnaud J Le Hors <lehors@us.ibm.com>
+Submitted-at: Wed, 07 Aug 2019 23:18:45 +0000
+Reviewed-on: https://gerrit.hyperledger.org/r/c/fabric-samples/+/32426
+Project: fabric-samples
+Branch: refs/heads/release-1.4
