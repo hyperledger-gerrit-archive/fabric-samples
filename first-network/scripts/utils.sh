@@ -134,6 +134,9 @@ instantiateChaincode() {
   setGlobals $PEER $ORG
   VERSION=${3:-1.0}
 
+  echo "Waiting for instantiation request to be committed ..."
+  sleep $DELAY
+
   # while 'peer chaincode' command can get the orderer endpoint from the peer
   # (if join was successful), let's supply it directly as we know it using
   # the "-o" option
