@@ -43,6 +43,10 @@ echo "Channel name : "$CHANNEL_NAME
 # import functions
 . scripts/utils.sh
 
+# Query chaincode on peer0.org1, check if the result is 90
+echo "Querying chaincode on peer0.org1..."
+chaincodeQuery 0 1 90
+
 # Query chaincode on peer0.org3, check if the result is 90
 echo "Querying chaincode on peer0.org3..."
 chaincodeQuery 0 3 90

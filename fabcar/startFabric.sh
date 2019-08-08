@@ -123,6 +123,19 @@ docker exec \
     --peerAddresses peer0.org1.example.com:7051 \
     --tlsRootCertFiles ${ORG1_TLS_ROOTCERT_FILE}
 
+
+echo "Querying chaincode on peer0.org1..."
+sleep 3
+docker exec \
+  -e CORE_PEER_LOCALMSPID=Org1MSP \
+  -e CORE_PEER_ADDRESS=peer0.org1.example.com:7051 \
+  -e CORE_PEER_MSPCONFIGPATH=${ORG1_MSPCONFIGPATH} \
+  -e CORE_PEER_TLS_ROOTCERT_FILE=${ORG1_TLS_ROOTCERT_FILE} \
+  peer chaincode query \
+    -C mychannel \
+    -n fabcar \
+    -c '{"function":"queryAllCars","Args":[]}'
+
 echo "Waiting for instantiation request to be committed ..."
 sleep 10
 
@@ -148,6 +161,31 @@ docker exec \
     --tlsRootCertFiles ${ORG1_TLS_ROOTCERT_FILE} \
     --tlsRootCertFiles ${ORG2_TLS_ROOTCERT_FILE} \
     --tlsRootCertFiles ${ORG2_TLS_ROOTCERT_FILE}
+
+echo "Querying chaincode on peer0.org1..."
+sleep 3
+docker exec \
+  -e CORE_PEER_LOCALMSPID=Org1MSP \
+  -e CORE_PEER_ADDRESS=peer0.org1.example.com:7051 \
+  -e CORE_PEER_MSPCONFIGPATH=${ORG1_MSPCONFIGPATH} \
+  -e CORE_PEER_TLS_ROOTCERT_FILE=${ORG1_TLS_ROOTCERT_FILE} \
+  peer chaincode query \
+    -C mychannel \
+    -n fabcar \
+    -c '{"function":"queryAllCars","Args":[]}'
+
+echo "Querying chaincode on peer0.org2..."
+sleep 3
+docker exec \
+  -e CORE_PEER_LOCALMSPID=Org2MSP \
+  -e CORE_PEER_ADDRESS=peer0.org2.example.com:9051 \
+  -e CORE_PEER_MSPCONFIGPATH=${ORG2_MSPCONFIGPATH} \
+  -e CORE_PEER_TLS_ROOTCERT_FILE=${ORG2_TLS_ROOTCERT_FILE} \
+  peer chaincode query \
+    -C mychannel \
+    -n fabcar \
+    -c '{"function":"queryAllCars","Args":[]}'
+
 set +x
 
 cat <<EOF
