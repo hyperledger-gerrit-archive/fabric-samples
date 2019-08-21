@@ -51,7 +51,7 @@ addCapabilityToChannel() {
         if [ $GROUP == "orderer" ]; then
                 jq -s '.[0] * {"channel_group":{"groups":{"Orderer": {"values": {"Capabilities": .[1]}}}}}' config.json ./scripts/capabilities.json > modified_config.json
         elif [ $GROUP == "channel" ]; then
-                jq -s '.[0] * {"channel_group":{"values": {"Capabilities": .[1]}}}' config.json ./scripts/capabilities.json > modified_config.json
+                jq -s '.[0] * {"channel_group":{"values": {"Capabilities": .[1]}}}' config.json ./scripts/channel_capabilities.json > modified_config.json
         elif [ $GROUP == "application" ]; then
                 jq -s '.[0] * {"channel_group":{"groups":{"Application": {"values": {"Capabilities": .[1]}}}}}' config.json ./scripts/capabilities.json > modified_config.json
         fi
