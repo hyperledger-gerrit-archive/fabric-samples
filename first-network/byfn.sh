@@ -261,7 +261,8 @@ function upgradeNetwork() {
       docker-compose $COMPOSE_FILES up -d --no-deps $PEER
     done
 
-    docker exec cli scripts/upgrade_to_v14.sh $CHANNEL_NAME $CLI_DELAY $LANGUAGE $CLI_TIMEOUT $VERBOSE
+    PREVIOUS_VERSION=$(configtxlator version | sed -ne 's/ Version: //p')
+    docker exec cli scripts/upgrade_to_v14.sh $CHANNEL_NAME $CLI_DELAY $LANGUAGE $CLI_TIMEOUT $VERBOSE $PREVIOUS_VERSION
     if [ $? -ne 0 ]; then
       echo "ERROR !!!! Test failed"
       exit 1
