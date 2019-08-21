@@ -8,6 +8,9 @@ SPDX-License-Identifier: Apache-2.0
 
 // ==== Invoke marbles, pass private data as base64 encoded bytes in transient map ====
 //
+// When parsing error "invalid character '\n'", adds tr -d \\n
+// ex) export MARBLE=$(echo -n "{\"name\":\"marble1\",\"color\":\"blue\",\"size\":35,\"owner\":\"tom\",\"price\":99}" | base64 | tr -d \\n)
+//
 // export MARBLE=$(echo -n "{\"name\":\"marble1\",\"color\":\"blue\",\"size\":35,\"owner\":\"tom\",\"price\":99}" | base64)
 // peer chaincode invoke -C mychannel -n marblesp -c '{"Args":["initMarble"]}' --transient "{\"marble\":\"$MARBLE\"}"
 //
