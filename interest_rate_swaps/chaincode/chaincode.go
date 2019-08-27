@@ -125,6 +125,8 @@ var functions = map[string]func(stub shim.ChaincodeStubInterface) pb.Response{
 	"calculatePayment": calculatePayment,
 	"settlePayment":    settlePayment,
 	"setReferenceRate": setReferenceRate,
+	"queryAsset": queryAsset,
+	"queryAuditLimit": queryAuditLimit,
 }
 
 // Create a new swap among participants.
@@ -303,6 +305,42 @@ func setReferenceRate(stub shim.ChaincodeStubInterface) pb.Response {
 		return shim.Error(err.Error())
 	}
 	return shim.Success([]byte{})
+}
+
+// Query fucntion
+func queryAsset(stub shim.ChaincodeStubInterface) pb.Response {
+	_, parameters := stub.GetFunctionAndParameters()
+	if len(parameters) != 2 {
+		return shim.Error("Wrong number of arguments supplied. Expected: <ID> <asset_type>")
+	}
+
+if string(parameters[1]) != "swap" && string(parameters[1]) != "payment" && string(parameters[1]) != "rr"  {
+			return shim.Error("Wrong asset type. use swap, payment, or rr")
+		}
+
+	queryString := string(parameters[1]) + parameters[0]
+
+	asset, err := stub.GetState(queryString)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	if asset == nil {
+		return shim.Error("Asset does not exist")
+	}
+	return shim.Success(asset)
+}
+
+//query audit limit
+func queryAuditLimit(stub shim.ChaincodeStubInterface) pb.Response {
+
+	Limit, err := stub.GetState("audit_limit")
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	if Limit == nil {
+		return shim.Error("Audit Limit has not been set")
+	}
+	return shim.Success(Limit)
 }
 
 func main() {
