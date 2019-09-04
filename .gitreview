@@ -3,3 +3,4 @@
 host=gerrit.hyperledger.org
 port=29418
 project=fabric-samples
+defaultbranch=release-1.4
