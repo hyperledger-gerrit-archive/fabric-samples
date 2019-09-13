@@ -246,6 +246,7 @@ Orderer: &OrdererDefaults
         Brokers:
             - 127.0.0.1:9092
 
+
     # Organizations is the list of orgs which are defined as participants on
     # the orderer side of the network
     Organizations:
