@@ -152,7 +152,7 @@ func (s *SmartContract) queryAllCars(APIstub shim.ChaincodeStubInterface) pb.Res
 			return shim.Error(err.Error())
 		}
 		// Add a comma before array members, suppress it for the first array member
-		if bArrayMemberAlreadyWritten == true {
+		if bArrayMemberAlreadyWritten {
 			buffer.WriteString(",")
 		}
 		buffer.WriteString("{\"Key\":")
